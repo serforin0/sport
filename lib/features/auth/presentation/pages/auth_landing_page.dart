@@ -1,30 +1,25 @@
-import 'package:flutter/material.dart';
-import 'package:sport/core/widgets/video_background.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/auth_providers.dart';
 import 'registration_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
-import '../../../settings/presentation/pages/settings_page.dart';
 
 enum AuthMode { landing, login }
 
-class AuthPage extends StatefulWidget {
+class AuthPage extends ConsumerStatefulWidget {
   const AuthPage({
     super.key,
     this.initialMode = AuthMode.landing,
     this.background,
   });
 
-  /// Para que el test pueda arrancar en landing/login según necesite.
   final AuthMode initialMode;
-
-  /// Permite inyectar el fondo. En prod: null => usa VideoBackground (mp4)
-  /// En tests: pasa un Container()/ColoredBox y evitas fallo por assets/video.
   final Widget? background;
 
   @override
-  State<AuthPage> createState() => _AuthPageState();
+  ConsumerState<AuthPage> createState() => _AuthPageState();
 }
 
-class _AuthPageState extends State<AuthPage> {
+class _AuthPageState extends ConsumerState<AuthPage> {
   late AuthMode _mode;
   bool _obscure = true;
 
@@ -50,6 +45,18 @@ class _AuthPageState extends State<AuthPage> {
   @override
   Widget build(BuildContext context) {
     final bg = widget.background ?? _DefaultBackground();
+    final authState = ref.watch(authControllerProvider);
+
+    // Listen for errors and show snackbar
+    ref.listen(authControllerProvider, (prev, next) {
+      next.whenOrNull(
+        error: (err, _) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(err.toString())),
+          );
+        },
+      );
+    });
 
     return Scaffold(
       body: Stack(
@@ -57,7 +64,10 @@ class _AuthPageState extends State<AuthPage> {
         children: [
           bg,
           Container(color: Colors.black.withValues(alpha: 0.45)),
+          if (authState.isLoading)
+            const Center(child: CircularProgressIndicator(color: Colors.white)),
           SafeArea(
+// ...
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 22),
               child: Column(
@@ -105,29 +115,11 @@ class _AuthPageState extends State<AuthPage> {
                                       emailCtrl: _emailCtrl,
                                       passCtrl: _passCtrl,
                                       obscure: _obscure,
-                                      onToggleObscure: () =>
-                                          setState(() => _obscure = !_obscure),
                                       onForgot: () {},
                                       onSubmit: () {
-                                        if (_emailCtrl.text ==
-                                                'yordyespinossa@gmail.com' &&
-                                            _passCtrl.text == '12345678') {
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  ProfilePage(),
-                                            ),
-                                          );
-                                        } else {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                  'Credenciales de prueba: yordyespinossa@gmail.com / 12345678'),
-                                            ),
-                                          );
-                                        }
+                                        ref
+                                            .read(authControllerProvider.notifier)
+                                            .signIn(_emailCtrl.text, _passCtrl.text);
                                       },
                                       onSocialGoogle: () {},
                                       onSocialFacebook: () {},

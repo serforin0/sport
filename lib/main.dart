@@ -1,18 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'features/auth/presentation/providers/auth_providers.dart';
+import 'features/auth/data/repositories/auth_repository_impl.dart';
+import 'features/profile/presentation/pages/profile_page.dart';
 
-import 'features/onboarding/presentation/pages/onboarding_page.dart';
-import 'features/auth/presentation/pages/auth_landing_page.dart';
-import 'features/settings/data/datasources/settings_local_datasource.dart';
-import 'features/settings/data/repositories/settings_repository_impl.dart';
-import 'features/settings/presentation/providers/profile_providers.dart';
-
-// Lee si el onboarding ya se completó
-final onboardingDoneProvider = FutureProvider<bool>((ref) async {
-  final prefs = await SharedPreferences.getInstance();
-  return prefs.getBool('onboarding_done') ?? false;
-});
+// ... (existing imports)
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +13,9 @@ void main() async {
       overrides: [
         settingsRepositoryProvider.overrideWithValue(
           SettingsRepositoryImpl(SettingsLocalDataSourceImpl(sharedPreferences)),
+        ),
+        authRepositoryProvider.overrideWithValue(
+          AuthRepositoryImpl(sharedPreferences),
         ),
       ],
       child: const App(),
@@ -36,11 +29,20 @@ class App extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final onboardingDone = ref.watch(onboardingDoneProvider);
+    final authState = ref.watch(authControllerProvider);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: onboardingDone.when(
-        data: (done) => done ? const AuthPage() : const OnboardingPage(),
+        data: (done) {
+          if (!done) return const OnboardingPage();
+          
+          return authState.when(
+            data: (user) => user != null ? const ProfilePage() : const AuthPage(),
+            loading: () => const _Splash(),
+            error: (_, __) => const AuthPage(),
+          );
+        },
         loading: () => const _Splash(),
         error: (error, stack) => const _Splash(),
       ),

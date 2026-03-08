@@ -1,12 +1,15 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../auth/presentation/providers/auth_providers.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final size = MediaQuery.sizeOf(context);
+    final authState = ref.watch(authControllerProvider);
+    final user = authState.valueOrNull;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
@@ -33,43 +36,28 @@ class ProfilePage extends StatelessWidget {
                 ),
                 Positioned(
                   top: 40,
-                  right: 10,
+                  right: 50,
                   child: IconButton(
-                    icon: const Icon(Icons.settings_outlined, color: Colors.white),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const SettingsPage()),
-                      );
-                    },
+                    icon: const Icon(Icons.logout, color: Colors.white),
+                    onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
                   ),
                 ),
-              ],
-            ),
-            
-            const SizedBox(height: 60),
-
-            // User Info Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Column(
+                Positioned(
+                  top: 40,
+                  right: 10,
+//...
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Lewis Hamilton',
-                            style: TextStyle(
+                          Text(
+                            user?.name ?? 'Cargando...',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
+                          const Text(
                             'Deportista • Piloto de F1 (Mercedes-AMG)',
                             style: TextStyle(color: Colors.white70, fontSize: 14),
                           ),

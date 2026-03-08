@@ -1,13 +1,14 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/auth_providers.dart';
 
-class RegistrationPage extends StatefulWidget {
+class RegistrationPage extends ConsumerStatefulWidget {
   const RegistrationPage({super.key});
 
   @override
-  State<RegistrationPage> createState() => _RegistrationPageState();
+  ConsumerState<RegistrationPage> createState() => _RegistrationPageState();
 }
 
-class _RegistrationPageState extends State<RegistrationPage> {
+class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   int _currentStep = 0;
   final _pageController = PageController();
 
@@ -32,7 +33,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
       );
       setState(() => _currentStep++);
     } else {
-      // Finalizar registro
+      // Finalizar registro con Riverpod
+      ref.read(authControllerProvider.notifier).signUp(
+            email: _emailCtrl.text,
+            password: _passCtrl.text,
+            name: _nameCtrl.text,
+          );
       Navigator.pop(context);
     }
   }
