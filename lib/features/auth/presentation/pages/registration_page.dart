@@ -224,7 +224,7 @@ class _StepInterests extends StatelessWidget {
               label: Text(sport),
               selected: sport == 'Fútbol' || sport == 'Pádel', // Ejemplo
               onSelected: (_) {},
-              backgroundColor: Colors.white05,
+              backgroundColor: Colors.white.withOpacity(0.05),
               selectedColor: const Color(0xFF3B82F6).withOpacity(0.3),
               checkmarkColor: Colors.white,
               labelStyle: const TextStyle(color: Colors.white),
@@ -276,7 +276,7 @@ class _RegField extends StatelessWidget {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.white05),
+              borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

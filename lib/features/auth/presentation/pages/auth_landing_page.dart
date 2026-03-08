@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sport/core/widgets/video_background.dart';
 import 'registration_page.dart';
-import '../../profile/presentation/pages/profile_page.dart';
-import '../../settings/presentation/pages/settings_page.dart';
+import '../../../profile/presentation/pages/profile_page.dart';
+import '../../../settings/presentation/pages/settings_page.dart';
 
 enum AuthMode { landing, login }
 
@@ -108,7 +108,27 @@ class _AuthPageState extends State<AuthPage> {
                                       onToggleObscure: () =>
                                           setState(() => _obscure = !_obscure),
                                       onForgot: () {},
-                                      onSubmit: () {},
+                                      onSubmit: () {
+                                        if (_emailCtrl.text ==
+                                                'yordyespinossa@gmail.com' &&
+                                            _passCtrl.text == '12345678') {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  ProfilePage(),
+                                            ),
+                                          );
+                                        } else {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                  'Credenciales de prueba: yordyespinossa@gmail.com / 12345678'),
+                                            ),
+                                          );
+                                        }
+                                      },
                                       onSocialGoogle: () {},
                                       onSocialFacebook: () {},
                                       onSocialApple: () {},
@@ -127,7 +147,7 @@ class _AuthPageState extends State<AuthPage> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (_) =>
-                                              const ProfilePage(), // TEMPORAL: Navega a Perfil para ver avances
+                                              ProfilePage(), // TEMPORAL: Navega a Perfil para ver avances
                                         ),
                                       ),
                                       onGoogle: () {},

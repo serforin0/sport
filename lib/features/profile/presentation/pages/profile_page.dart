@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../settings/presentation/pages/settings_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -60,8 +61,8 @@ class ProfilePage extends StatelessWidget {
                       const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Miguel Ovalles',
+                          const Text(
+                            'Lewis Hamilton',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -69,7 +70,7 @@ class ProfilePage extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'Deportista • Piloto de F1',
+                            'Deportista • Piloto de F1 (Mercedes-AMG)',
                             style: TextStyle(color: Colors.white70, fontSize: 14),
                           ),
                         ],
@@ -102,7 +103,7 @@ class _CoverImage extends StatelessWidget {
       width: double.infinity,
       decoration: const BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage('https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?q=80&w=2070&auto=format&fit=crop'),
+          image: NetworkImage('https://images.unsplash.com/photo-1534330207526-8e81f10ec6fe?q=80&w=2070&auto=format&fit=crop'), // F1 track
           fit: BoxFit.cover,
         ),
       ),

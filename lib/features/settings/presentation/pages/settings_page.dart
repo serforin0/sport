@@ -1,4 +1,13 @@
 import 'package:flutter/material.dart';
+import 'edit_profile_page.dart';
+import 'notification_settings_page.dart';
+import 'privacy_settings_page.dart';
+import 'help_support_page.dart';
+import 'security_settings_page.dart';
+import 'billing_settings_page.dart';
+import 'social_settings_page.dart';
+import 'general_settings_page.dart';
+import 'contact_support_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -6,7 +15,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Fondo oscuro premium
+      backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -18,7 +27,7 @@ class SettingsPage extends StatelessWidget {
           'CONFIGURACIÓN',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
           ),
@@ -29,81 +38,121 @@ class SettingsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _SettingsHeader(title: 'CUENTA'),
+            const _SettingsHeader(title: 'PERFIL'),
             _SettingsTile(
               icon: Icons.person_outline,
               title: 'Editar perfil',
-              onTap: () {},
+              subtitle: 'Información básica y foto',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EditProfilePage()),
+              ),
             ),
             _SettingsTile(
-              icon: Icons.email_outlined,
-              title: 'Correo electrónico',
-              subtitle: 'miguel.ovalles@email.com',
-              onTap: () {},
-            ),
-            _SettingsTile(
-              icon: Icons.lock_outline,
-              title: 'Cambiar contraseña',
-              onTap: () {},
+              icon: Icons.badge_outlined,
+              title: 'Datos adicionales',
+              subtitle: 'Categoría, Deporte, Posición',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EditProfilePage()), // Apunta a la misma por ahora
+              ),
             ),
 
-            const _SettingsHeader(title: 'NOTIFICACIONES'),
-            _SettingsSwitchTile(
-              icon: Icons.notifications_none,
-              title: 'Notificaciones Push',
-              value: true,
-              onChanged: (val) {},
+            const _SettingsHeader(title: 'PREFERENCIAS GENERALES'),
+            _SettingsTile(
+              icon: Icons.language,
+              title: 'Idioma y región',
+              subtitle: 'Español (España)',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const GeneralSettingsPage()),
+              ),
             ),
-            _SettingsSwitchTile(
-              icon: Icons.mail_outline,
-              title: 'Notificaciones por correo',
-              value: false,
-              onChanged: (val) {},
+            _SettingsTile(
+              icon: Icons.notifications_none,
+              title: 'Notificaciones',
+              subtitle: 'Push, Correo y Actividad',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const NotificationSettingsPage()),
+              ),
+            ),
+
+            const _SettingsHeader(title: 'SUSCRIPCIONES'),
+            _SettingsTile(
+              icon: Icons.star_outline,
+              title: 'HubSport Premium',
+              subtitle: 'Gestionar mi plan actual',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const BillingSettingsPage()),
+              ),
+            ),
+            _SettingsTile(
+              icon: Icons.credit_card_outlined,
+              title: 'Métodos de pago',
+              subtitle: 'Tarjetas y facturación',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const BillingSettingsPage()),
+              ),
             ),
 
             const _SettingsHeader(title: 'PRIVACIDAD Y SEGURIDAD'),
             _SettingsTile(
-              icon: Icons.visibility_outlined,
-              title: 'Visibilidad del perfil',
-              subtitle: 'Público',
-              onTap: () {},
+              icon: Icons.lock_person_outlined,
+              title: 'Privacidad',
+              subtitle: 'Visibilidad y bloqueos',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PrivacySettingsPage()),
+              ),
             ),
             _SettingsTile(
-              icon: Icons.block_outlined,
+              icon: Icons.security,
+              title: 'Seguridad',
+              subtitle: 'Contraseña y 2FA',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SecuritySettingsPage()),
+              ),
+            ),
+            _SettingsTile(
+              icon: Icons.block,
               title: 'Usuarios bloqueados',
-              onTap: () {},
-            ),
-            _SettingsTile(
-              icon: Icons.verified_user_outlined,
-              title: 'Autenticación de dos pasos',
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SocialSettingsPage()),
+              ),
             ),
 
-            const _SettingsHeader(title: 'AYUDA Y SOPORTE'),
+            const _SettingsHeader(title: 'CUENTA'),
+            _SettingsTile(
+              icon: Icons.link,
+              title: 'Cuentas vinculadas',
+              subtitle: 'Google, Facebook, Apple',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SocialSettingsPage()),
+              ),
+            ),
             _SettingsTile(
               icon: Icons.help_outline,
-              title: 'Centro de ayuda / FAQ',
-              onTap: () {},
+              title: 'Ayuda y Soporte',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HelpSupportPage()),
+              ),
             ),
             _SettingsTile(
               icon: Icons.contact_support_outlined,
-              title: 'Contáctanos',
-              onTap: () {},
-            ),
-            _SettingsTile(
-              icon: Icons.description_outlined,
-              title: 'Términos y condiciones',
-              onTap: () {},
+              title: 'Contacta con Hubsport',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ContactSupportPage()),
+              ),
             ),
 
-            const _SettingsHeader(title: 'ACERCA DE'),
-            _SettingsTile(
-              icon: Icons.info_outline,
-              title: 'Versión de la aplicación',
-              subtitle: '1.0.0 (Build 42)',
-              showArrow: false,
-              onTap: () {},
-            ),
             const SizedBox(height: 32),
             Center(
               child: TextButton(
