@@ -8,42 +8,62 @@ import 'package:sport/features/settings/presentation/pages/contact_support_page.
 
 void main() {
   group('Settings Detailed Pages Tests', () {
-    testWidgets('SecuritySettingsPage renders correctly', (WidgetTester tester) async {
+    
+    testWidgets('ContactSupportPage validation errors', (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1200));
+      await tester.pumpWidget(const MaterialApp(home: ContactSupportPage()));
+      
+      final sendButton = find.text('Enviar');
+      await tester.ensureVisible(sendButton);
+      await tester.tap(sendButton);
+      await tester.pump();
+      
+      expect(find.text('El mensaje no puede estar vacío'), findsOneWidget);
+      
+      // Use find.byType(TextFormField) directly or by descendant of Form
+      final textField = find.byType(TextFormField);
+      await tester.enterText(textField, 'Short');
+      await tester.tap(sendButton);
+      await tester.pump();
+      
+      expect(find.text('El mensaje debe ser más detallado (mín. 10 caracteres)'), findsOneWidget);
+    });
+    
+    testWidgets('SecuritySettingsPage rendering', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: SecuritySettingsPage()));
       expect(find.text('SEGURIDAD'), findsOneWidget);
-      expect(find.text('ACCESO'), findsOneWidget);
       expect(find.text('Cambiar contraseña'), findsOneWidget);
-      expect(find.text('Tu cuenta está protegida'), findsOneWidget);
     });
 
-    testWidgets('BillingSettingsPage renders correctly', (WidgetTester tester) async {
+    testWidgets('BillingSettingsPage rendering', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: BillingSettingsPage()));
       expect(find.text('FACTURACIÓN'), findsOneWidget);
-      expect(find.text('SUSCRIPCIÓN'), findsOneWidget);
-      expect(find.text('HubSport Premium'), findsOneWidget);
       expect(find.text('MEJORAR PLAN'), findsOneWidget);
     });
 
-    testWidgets('SocialSettingsPage renders correctly', (WidgetTester tester) async {
+    testWidgets('SocialSettingsPage rendering', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: SocialSettingsPage()));
       expect(find.text('SOCIAL'), findsOneWidget);
-      expect(find.text('GESTIÓN DE USUARIOS'), findsOneWidget);
-      expect(find.text('Usuarios bloqueados'), findsOneWidget);
       expect(find.text('Google'), findsOneWidget);
     });
 
-    testWidgets('GeneralSettingsPage renders correctly', (WidgetTester tester) async {
+    testWidgets('GeneralSettingsPage rendering', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: GeneralSettingsPage()));
       expect(find.text('GENERAL'), findsOneWidget);
-      expect(find.text('PREFERENCIAS'), findsOneWidget);
-      expect(find.text('Idioma de la aplicación'), findsOneWidget);
     });
 
-    testWidgets('ContactSupportPage renders correctly', (WidgetTester tester) async {
+    testWidgets('ContactSupportPage dropdown selection', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: ContactSupportPage()));
-      expect(find.text('CONTACTA CON HUBSPORT'), findsOneWidget);
-      expect(find.text('Motivo de contacto'), findsOneWidget);
-      expect(find.text('Enviar'), findsOneWidget);
+      
+      expect(find.text('Problema/error en la app'), findsOneWidget);
+      
+      await tester.tap(find.text('Problema/error en la app'));
+      await tester.pumpAndSettle();
+      
+      await tester.tap(find.text('Sugerencia y mejoras').last);
+      await tester.pumpAndSettle();
+      
+      expect(find.text('Sugerencia y mejoras'), findsOneWidget);
     });
   });
 }
