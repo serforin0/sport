@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sport/core/widgets/video_background.dart';
+import 'registration_page.dart';
+import '../../profile/presentation/pages/profile_page.dart';
+import '../../settings/presentation/pages/settings_page.dart';
 
 enum AuthMode { landing, login }
 
@@ -109,12 +112,24 @@ class _AuthPageState extends State<AuthPage> {
                                       onSocialGoogle: () {},
                                       onSocialFacebook: () {},
                                       onSocialApple: () {},
-                                      onGoRegister: () {},
+                                      onGoRegister: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const RegistrationPage(),
+                                        ),
+                                      ),
                                     )
                                   : _Landing(
                                       key: const ValueKey('landing'),
                                       onGoLogin: _goLogin,
-                                      onRegisterEmail: () {},
+                                      onRegisterEmail: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const ProfilePage(), // TEMPORAL: Navega a Perfil para ver avances
+                                        ),
+                                      ),
                                       onGoogle: () {},
                                       onFacebook: () {},
                                       onApple: () {},
@@ -172,59 +187,48 @@ class _Landing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ NO Spacer/Expanded dentro de ScrollView.
-    // ✅ Se alinea al fondo usando Align.
     return Align(
       alignment: Alignment.bottomCenter,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           _PrimaryButton(
-            text: 'Registrarme con correo',
+            text: 'ENTRAR',
+            backgroundColor: const Color(0xFF1E3A8A), // Azul oscuro
+            onTap: onGoLogin,
+          ),
+          const SizedBox(height: 16),
+          _PrimaryButton(
+            text: 'REGISTRARSE',
+            backgroundColor: const Color(0xFF3B82F6), // Azul claro
             onTap: onRegisterEmail,
           ),
-          const SizedBox(height: 14),
-
-          _OutlineSocialButton(
-            text: 'Regístrate con Google',
-            iconText: 'G',
-            onTap: onGoogle,
+          const SizedBox(height: 32),
+          const Row(
+            children: [
+              Expanded(child: Divider(color: Colors.white24)),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'o continúa con',
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+              ),
+              Expanded(child: Divider(color: Colors.white24)),
+            ],
           ),
-          const SizedBox(height: 10),
-          _OutlineSocialButton(
-            text: 'Regístrate con Facebook',
-            iconText: 'f',
-            onTap: onFacebook,
-          ),
-          const SizedBox(height: 10),
-          _OutlineSocialButton(
-            text: 'Regístrate con Apple',
-            iconText: '',
-            onTap: onApple,
-          ),
-
-          const SizedBox(height: 18),
-
+          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                '¿Ya tienes una cuenta? ',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.90)),
-              ),
-              GestureDetector(
-                onTap: onGoLogin,
-                child: const Text(
-                  'Inicia sesión ahora',
-                  style: TextStyle(
-                    color: Colors.lightBlueAccent,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
+              _SocialIconButton(text: 'G', onTap: onGoogle),
+              const SizedBox(width: 16),
+              _SocialIconButton(text: 'f', onTap: onFacebook),
+              const SizedBox(width: 16),
+              _SocialIconButton(text: '', onTap: onApple),
             ],
           ),
-          const SizedBox(height: 26),
+          const SizedBox(height: 40),
         ],
       ),
     );
@@ -429,24 +433,34 @@ class _PillTextField extends StatelessWidget {
 class _PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
-  const _PrimaryButton({required this.text, required this.onTap});
+  final Color? backgroundColor;
+
+  const _PrimaryButton({
+    required this.text,
+    required this.onTap,
+    this.backgroundColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 48,
+      height: 52,
       width: double.infinity,
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue.withValues(alpha: 0.75),
+          backgroundColor: backgroundColor ?? Colors.blue.withValues(alpha: 0.75),
           foregroundColor: Colors.white,
           shape: const StadiumBorder(),
           elevation: 0,
         ),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.8,
+          ),
         ),
       ),
     );
