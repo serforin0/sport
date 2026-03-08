@@ -1,5 +1,15 @@
+import '../errors/failures.dart';
+
 sealed class Result<T> {
   const Result();
+
+  R fold<R>(R Function(Failure f) onFailure, R Function(T data) onSuccess) {
+    if (this is Ok<T>) {
+      return onSuccess((this as Ok<T>).value);
+    } else {
+      return onFailure((this as Err<T>).failure);
+    }
+  }
 }
 
 class Ok<T> extends Result<T> {
@@ -8,6 +18,6 @@ class Ok<T> extends Result<T> {
 }
 
 class Err<T> extends Result<T> {
-  final Object error;
-  const Err(this.error);
+  final Failure failure;
+  const Err(this.failure);
 }

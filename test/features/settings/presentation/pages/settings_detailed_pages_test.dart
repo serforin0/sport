@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:sport/features/settings/presentation/pages/security_settings_page.dart';
 import 'package:sport/features/settings/presentation/pages/billing_settings_page.dart';
 import 'package:sport/features/settings/presentation/pages/social_settings_page.dart';
 import 'package:sport/features/settings/presentation/pages/general_settings_page.dart';
 import 'package:sport/features/settings/presentation/pages/contact_support_page.dart';
+import 'package:sport/features/settings/presentation/providers/profile_providers.dart';
+import 'package:sport/core/result/result.dart';
+import '../providers/test_utils.dart';
 
 void main() {
+  late MockSettingsRepository mockSettingsRepository;
+
+  setUp(() {
+    mockSettingsRepository = MockSettingsRepository();
+    when(() => mockSettingsRepository.getProfile())
+        .thenAnswer((_) async => const Ok(tUserProfile));
+  });
+
   group('Settings Detailed Pages Tests', () {
     
     testWidgets('ContactSupportPage validation errors', (WidgetTester tester) async {
       await tester.binding.setSurfaceSize(const Size(800, 1200));
-      await tester.pumpWidget(const MaterialApp(home: ContactSupportPage()));
+      await tester.pumpWidget(
+        createTestableWidget(
+          overrides: [
+            settingsRepositoryProvider.overrideWithValue(mockSettingsRepository),
+          ],
+          child: const MaterialApp(home: ContactSupportPage()),
+        ),
+      );
       
       final sendButton = find.text('Enviar');
       await tester.ensureVisible(sendButton);
@@ -20,7 +39,6 @@ void main() {
       
       expect(find.text('El mensaje no puede estar vacío'), findsOneWidget);
       
-      // Use find.byType(TextFormField) directly or by descendant of Form
       final textField = find.byType(TextFormField);
       await tester.enterText(textField, 'Short');
       await tester.tap(sendButton);

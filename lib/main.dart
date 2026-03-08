@@ -4,6 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/auth/presentation/pages/auth_landing_page.dart';
+import 'features/settings/data/datasources/settings_local_datasource.dart';
+import 'features/settings/data/repositories/settings_repository_impl.dart';
+import 'features/settings/presentation/providers/profile_providers.dart';
 
 // Lee si el onboarding ya se completó
 final onboardingDoneProvider = FutureProvider<bool>((ref) async {
@@ -11,8 +14,20 @@ final onboardingDoneProvider = FutureProvider<bool>((ref) async {
   return prefs.getBool('onboarding_done') ?? false;
 });
 
-void main() {
-  runApp(const ProviderScope(child: App()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final sharedPreferences = await SharedPreferences.getInstance();
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        settingsRepositoryProvider.overrideWithValue(
+          SettingsRepositoryImpl(SettingsLocalDataSourceImpl(sharedPreferences)),
+        ),
+      ],
+      child: const App(),
+    ),
+  );
 }
 
 class App extends ConsumerWidget {

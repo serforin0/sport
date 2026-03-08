@@ -1,19 +1,13 @@
-import 'package:flutter/material.dart';
-import 'edit_profile_page.dart';
-import 'notification_settings_page.dart';
-import 'privacy_settings_page.dart';
-import 'help_support_page.dart';
-import 'security_settings_page.dart';
-import 'billing_settings_page.dart';
-import 'social_settings_page.dart';
-import 'general_settings_page.dart';
-import 'contact_support_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/profile_providers.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(profileControllerProvider(null));
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
@@ -42,7 +36,11 @@ class SettingsPage extends StatelessWidget {
             _SettingsTile(
               icon: Icons.person_outline,
               title: 'Editar perfil',
-              subtitle: 'Información básica y foto',
+              subtitle: profileAsync.when(
+                data: (p) => '${p.firstName} ${p.lastName}',
+                loading: () => 'Cargando...',
+                error: (_, __) => 'Información básica',
+              ),
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const EditProfilePage()),
