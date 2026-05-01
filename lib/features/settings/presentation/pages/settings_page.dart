@@ -1,5 +1,15 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/profile_providers.dart';
+import 'edit_profile_page.dart';
+import 'general_settings_page.dart';
+import 'notification_settings_page.dart';
+import 'billing_settings_page.dart';
+import 'privacy_settings_page.dart';
+import 'security_settings_page.dart';
+import 'social_settings_page.dart';
+import 'help_support_page.dart';
+import 'contact_support_page.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -39,7 +49,7 @@ class SettingsPage extends ConsumerWidget {
               subtitle: profileAsync.when(
                 data: (p) => '${p.firstName} ${p.lastName}',
                 loading: () => 'Cargando...',
-                error: (_, __) => 'Información básica',
+                error: (_, _) => 'Información básica',
               ),
               onTap: () => Navigator.push(
                 context,
@@ -196,14 +206,12 @@ class _SettingsTile extends StatelessWidget {
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
-  final bool showArrow;
 
   const _SettingsTile({
     required this.icon,
     required this.title,
     this.subtitle,
     required this.onTap,
-    this.showArrow = true,
   });
 
   @override
@@ -212,7 +220,7 @@ class _SettingsTile extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, color: Colors.white, size: 20),
@@ -224,45 +232,9 @@ class _SettingsTile extends StatelessWidget {
       subtitle: subtitle != null 
           ? Text(subtitle!, style: const TextStyle(color: Colors.white38, fontSize: 13)) 
           : null,
-      trailing: showArrow ? const Icon(Icons.chevron_right, color: Colors.white24) : null,
+      trailing: const Icon(Icons.chevron_right, color: Colors.white24),
       onTap: onTap,
     );
   }
 }
 
-class _SettingsSwitchTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  const _SettingsSwitchTile({
-    required this.icon,
-    required this.title,
-    required this.value,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SwitchListTile(
-      secondary: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(icon, color: Colors.white, size: 20),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500),
-      ),
-      value: value,
-      onChanged: onChanged,
-      activeColor: const Color(0xFF3B82F6),
-      inactiveThumbColor: Colors.grey,
-      inactiveTrackColor: Colors.white12,
-    );
-  }
-}

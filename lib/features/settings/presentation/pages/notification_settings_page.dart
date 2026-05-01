@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sport/features/settings/presentation/providers/profile_providers.dart';
 
-class NotificationSettingsPage extends StatefulWidget {
+class NotificationSettingsPage extends ConsumerWidget {
   const NotificationSettingsPage({super.key});
 
   @override
-  State<NotificationSettingsPage> createState() => _NotificationSettingsPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(settingsControllerProvider);
+    final settings = async.valueOrNull;
+    final notifications = settings?.notifications;
 
-class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
-  bool _pushEnabled = true;
-  bool _emailEnabled = false;
-  bool _messagesEnabled = true;
-  bool _eventsEnabled = true;
-  bool _tipsEnabled = true;
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
@@ -36,39 +31,51 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
+      body: settings == null
+          ? const Center(child: CircularProgressIndicator(color: Colors.white))
+          : SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _sectionHeader('CANALES PRINCIPALES'),
+            const _SectionHeader('CANALES PRINCIPALES'),
             _NotificationSwitchTile(
               title: 'Notificaciones Push',
               subtitle: 'Recibe alertas en tu dispositivo',
-              value: _pushEnabled,
-              onChanged: (val) => setState(() => _pushEnabled = val),
+              value: notifications!.pushEnabled,
+              onChanged: (val) => ref.read(settingsControllerProvider.notifier).updateSettings(
+                    settings.copyWith(notifications: notifications.copyWith(pushEnabled: val)),
+                  ),
             ),
             _NotificationSwitchTile(
               title: 'Correo electrónico',
               subtitle: 'Recibe resúmenes y noticias',
-              value: _emailEnabled,
-              onChanged: (val) => setState(() => _emailEnabled = val),
+              value: notifications.emailEnabled,
+              onChanged: (val) => ref.read(settingsControllerProvider.notifier).updateSettings(
+                    settings.copyWith(notifications: notifications.copyWith(emailEnabled: val)),
+                  ),
             ),
             const Divider(color: Colors.white12, height: 32, indent: 20, endIndent: 20),
-            const _sectionHeader('ACTIVIDAD'),
+            const _SectionHeader('ACTIVIDAD'),
             _NotificationSwitchTile(
               title: 'Mensajes directos',
-              value: _messagesEnabled,
-              onChanged: (val) => setState(() => _messagesEnabled = val),
+              value: notifications.messagesEnabled,
+              onChanged: (val) => ref.read(settingsControllerProvider.notifier).updateSettings(
+                    settings.copyWith(notifications: notifications.copyWith(messagesEnabled: val)),
+                  ),
             ),
             _NotificationSwitchTile(
-              title: 'Nuevos eventos',
-              value: _eventsEnabled,
-              onChanged: (val) => setState(() => _eventsEnabled = val),
+              title: 'Nuevas oportunidades',
+              value: notifications.opportunitiesEnabled,
+              onChanged: (val) => ref.read(settingsControllerProvider.notifier).updateSettings(
+                    settings.copyWith(notifications: notifications.copyWith(opportunitiesEnabled: val)),
+                  ),
             ),
             _NotificationSwitchTile(
               title: 'Consejos de entrenamiento',
-              value: _tipsEnabled,
-              onChanged: (val) => setState(() => _tipsEnabled = val),
+              value: notifications.tipsEnabled,
+              onChanged: (val) => ref.read(settingsControllerProvider.notifier).updateSettings(
+                    settings.copyWith(notifications: notifications.copyWith(tipsEnabled: val)),
+                  ),
             ),
           ],
         ),
@@ -77,9 +84,9 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   }
 }
 
-class _sectionHeader extends StatelessWidget {
+class _SectionHeader extends StatelessWidget {
   final String title;
-  const _sectionHeader(this.title);
+  const _SectionHeader(this.title);
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +130,7 @@ class _NotificationSwitchTile extends StatelessWidget {
           : null,
       value: value,
       onChanged: onChanged,
-      activeColor: const Color(0xFF3B82F6),
+      activeThumbColor: const Color(0xFF3B82F6),
       inactiveThumbColor: Colors.grey,
       inactiveTrackColor: Colors.white12,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),

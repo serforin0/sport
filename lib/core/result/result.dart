@@ -10,6 +10,9 @@ sealed class Result<T> {
       return onFailure((this as Err<T>).failure);
     }
   }
+
+  bool get isSuccess => this is Ok<T>;
+  bool get isFailure => this is Err<T>;
 }
 
 class Ok<T> extends Result<T> {

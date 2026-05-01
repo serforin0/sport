@@ -1,10 +1,18 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sport/features/support/presentation/providers/support_providers.dart';
+import 'invoices_page.dart';
+import 'payment_methods_page.dart';
+import 'add_card_page.dart';
 
-class BillingSettingsPage extends StatelessWidget {
+class BillingSettingsPage extends ConsumerWidget {
   const BillingSettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summaryAsync = ref.watch(billingSummaryProvider);
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
@@ -24,122 +32,132 @@ class BillingSettingsPage extends StatelessWidget {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white70),
+            onPressed: () => ref.invalidate(billingSummaryProvider),
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _BillingHeader(title: 'SUSCRIPCIÓN'),
-            _BillingTile(
-              icon: Icons.star_outline,
-              title: 'HubSport Premium',
-              subtitle: 'Plan Activo: Profesional',
-              onTap: () {
-                // Ver detalles premium
-              },
+      body: summaryAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF3B82F6))),
+        error: (e, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              'No se pudo cargar el resumen.\n$e',
+              style: const TextStyle(color: Colors.white54),
+              textAlign: TextAlign.center,
             ),
-
-            const SizedBox(height: 16),
-            _BillingHeader(title: 'PAGOS'),
-            _BillingTile(
-              icon: Icons.credit_card_outlined,
-              title: 'Métodos de pago',
-              subtitle: 'Visa terminada en 4242',
-              onTap: () {
-                // Gestionar tarjetas
-              },
-            ),
-            _BillingTile(
-              icon: Icons.receipt_long_outlined,
-              title: 'Historial de Pagos',
-              onTap: () {
-                // Ver transacciones
-              },
-            ),
-
-            const SizedBox(height: 32),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF3B82F6), Color(0xFF1E40AF)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF3B82F6).withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+          ),
+        ),
+        data: (map) {
+          final isEmpty = map.isEmpty;
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 24, bottom: 16),
+                    child: Text(
+                      'Resumen de facturación (placeholder desde GET /billing/summary). '
+                      'La pasarela de pago se integrará próximamente.',
+                      style: TextStyle(color: Colors.white60, fontSize: 14, height: 1.4),
                     ),
-                  ],
+                  )
+                else ...[
+                  const Text(
+                    'Datos del servidor',
+                    style: TextStyle(
+                      color: Color(0xFF3B82F6),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.1,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SelectableText(
+                    const JsonEncoder.withIndent('  ').convert(map),
+                    style: const TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'monospace'),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+                const _BillingHeader(title: 'SUSCRIPCIÓN'),
+                _BillingTile(
+                  icon: Icons.star_outline,
+                  title: 'HubSport Premium',
+                  subtitle: 'Plan Activo: Profesional',
+                  onTap: () {}, // Future: Plan details
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'PREMIUM',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 2,
-                          ),
+                const SizedBox(height: 16),
+                const _BillingHeader(title: 'PAGOS'),
+                _BillingTile(
+                  icon: Icons.credit_card_outlined,
+                  title: 'Métodos de pago',
+                  subtitle: 'Visa terminada en 4242',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PaymentMethodsPage()),
+                  ),
+                ),
+                _BillingTile(
+                  icon: Icons.receipt_long_outlined,
+                  title: 'Historial de Pagos',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const InvoicesPage()),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 0),
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF3B82F6), Color(0xFF1E40AF)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF3B82F6).withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
                         ),
-                        Icon(Icons.auto_awesome, color: Colors.white, size: 24),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Sube de nivel tu carrera deportiva',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Obtén visibilidad exclusiva ante ojeadores y estadísticas avanzadas.',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFF3B82F6),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.workspace_premium, color: Colors.white, size: 40),
+                        SizedBox(height: 12),
+                        Text(
+                          'Desbloquea todo el potencial',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                          elevation: 0,
+                          textAlign: TextAlign.center,
                         ),
-                        child: const Text(
-                          'MEJORAR PLAN',
-                          style: TextStyle(fontWeight: FontWeight.w900),
+                        SizedBox(height: 8),
+                        Text(
+                          'Accede a estadísticas avanzadas y visibilidad prioritaria.',
+                          style: TextStyle(color: Colors.white70, fontSize: 13),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 48),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -152,12 +170,12 @@ class _BillingHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
       child: Text(
         title,
         style: const TextStyle(
           color: Color(0xFF3B82F6),
-          fontSize: 12,
+          fontSize: 13,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.1,
         ),
@@ -182,6 +200,7 @@ class _BillingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      contentPadding: EdgeInsets.zero,
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(

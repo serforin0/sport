@@ -1,7 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_providers.dart';
 import 'registration_page.dart';
-import '../../../profile/presentation/pages/profile_page.dart';
+import 'package:sport/core/widgets/video_background.dart';
 
 enum AuthMode { landing, login }
 
@@ -47,9 +48,12 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     final bg = widget.background ?? _DefaultBackground();
     final authState = ref.watch(authControllerProvider);
 
-    // Listen for errors and show snackbar
+    // Listen for errors and show snackbar, and handle navigation success fallback
     ref.listen(authControllerProvider, (prev, next) {
       next.whenOrNull(
+        data: (user) {
+          // No manual navigation here. main.dart handles the screen swap via state.
+        },
         error: (err, _) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(err.toString())),
@@ -77,9 +81,9 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                     'HUBSPORT',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 36,
+                      fontSize: 38,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: 1,
+                      letterSpacing: 1.5,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -115,6 +119,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                                       emailCtrl: _emailCtrl,
                                       passCtrl: _passCtrl,
                                       obscure: _obscure,
+                                      onToggleObscure: () =>
+                                          setState(() => _obscure = !_obscure),
                                       onForgot: () {},
                                       onSubmit: () {
                                         ref
@@ -139,7 +145,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (_) =>
-                                              ProfilePage(), // TEMPORAL: Navega a Perfil para ver avances
+                                              const RegistrationPage(),
                                         ),
                                       ),
                                       onGoogle: () {},
@@ -177,7 +183,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
 class _DefaultBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const VideoBackground(assetPath: 'assets/auth/login_bg.mp4');
+    return VideoBackground(assetPath: 'assets/videos/login_bg.mp4');
   }
 }
 
@@ -473,51 +479,6 @@ class _PrimaryButton extends StatelessWidget {
             fontWeight: FontWeight.w800,
             letterSpacing: 0.8,
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OutlineSocialButton extends StatelessWidget {
-  final String text;
-  final String iconText;
-  final VoidCallback onTap;
-
-  const _OutlineSocialButton({
-    required this.text,
-    required this.iconText,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 46,
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: onTap,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white,
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.35),
-            width: 1.2,
-          ),
-          shape: const StadiumBorder(),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              iconText,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              text,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-            ),
-          ],
         ),
       ),
     );

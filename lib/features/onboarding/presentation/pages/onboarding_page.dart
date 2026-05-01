@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sport/features/onboarding/presentation/providers/onboarding_providers.dart';
 
-import '../../../auth/presentation/pages/auth_landing_page.dart';
-
 class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key});
 
@@ -38,10 +36,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     ),
     _OnboardingModel(
       imageAsset: 'assets/onboarding/3.jpg',
-      title: 'Descubre Eventos\nDeportivos',
+      title: 'Crea tu Red\nDeportiva',
       description:
-          'Puedes descubrir fácilmente los eventos que están ocurriendo cerca de ti. '
-          'Desde juegos de baloncesto locales hasta maratones en tu ciudad.',
+          'Encuentra perfiles deportivos, conecta con personas clave y mantente '
+          'cerca de nuevas oportunidades profesionales.',
       buttonText: 'Finalizar',
     ),
   ];
@@ -57,11 +55,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
     if (isLast) {
       await ref.read(onboardingActionsProvider).markDone();
-      if (!mounted) return;
-
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const AuthPage()));
       return;
     }
 

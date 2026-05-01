@@ -1,36 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/validators.dart';
+import 'package:sport/core/providers/shared_preferences_provider.dart';
+import 'package:sport/features/auth/presentation/providers/auth_providers.dart';
+import 'package:sport/features/support/presentation/providers/support_providers.dart';
 
-class ContactSupportPage extends StatefulWidget {
+class ContactSupportPage extends ConsumerStatefulWidget {
   const ContactSupportPage({super.key});
 
   @override
-  State<ContactSupportPage> createState() => _ContactSupportPageState();
+  ConsumerState<ContactSupportPage> createState() => _ContactSupportPageState();
 }
 
-class _ContactSupportPageState extends State<ContactSupportPage> {
+class _ContactSupportPageState extends ConsumerState<ContactSupportPage> {
   final _formKey = GlobalKey<FormState>();
   String _selectedReason = 'Problema/error en la app';
   final _messageController = TextEditingController();
+  final _emailController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = ref.read(authControllerProvider).valueOrNull;
+      if (user != null && user.email.isNotEmpty) {
+        _emailController.text = user.email;
+      }
+    });
+  }
 
   @override
   void dispose() {
     _messageController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      // Enviar mensaje
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final prefs = ref.read(sharedPreferencesProvider);
+    final token = prefs.getString('auth_token');
+    final needsEmail = token == null;
+    if (needsEmail && _emailController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mensaje enviado con éxito')),
+        const SnackBar(content: Text('Indica tu correo para contactarte')),
       );
-      Navigator.pop(context);
+      return;
+    }
+
+    try {
+      await ref.read(supportRemoteDataSourceProvider).submitContact(
+            token: token,
+            subject: _selectedReason,
+            message: _messageController.text.trim(),
+            email: needsEmail ? _emailController.text.trim() : null,
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Mensaje enviado con éxito')),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al enviar: $e')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final token = ref.watch(sharedPreferencesProvider).getString('auth_token');
+    final showEmailField = token == null;
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
@@ -96,12 +141,35 @@ class _ContactSupportPageState extends State<ContactSupportPage> {
                   ),
                 ),
               ),
+              if (showEmailField) ...[
+                const SizedBox(height: 24),
+                const Text(
+                  'Correo electrónico',
+                  style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  style: const TextStyle(color: Colors.white),
+                  validator: Validators.validateEmail,
+                  decoration: InputDecoration(
+                    hintText: 'tu@email.com',
+                    hintStyle: const TextStyle(color: Colors.white24),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.05),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 12),
               Text(
                 'Le estaremos contactando vía correo. Nuestro tiempo de respuesta es de 24hrs.',
                 style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 12),
               ),
-
               const SizedBox(height: 32),
               const Text(
                 'Mensaje',
@@ -125,38 +193,6 @@ class _ContactSupportPageState extends State<ContactSupportPage> {
                   errorStyle: const TextStyle(color: Colors.redAccent),
                 ),
               ),
-
-              const SizedBox(height: 32),
-              const Text(
-                'Multimedia',
-                style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Agrega imágenes relacionadas a tu mensaje',
-                style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 12),
-              ),
-              const SizedBox(height: 16),
-              InkWell(
-                onTap: () {
-                  // Seleccionar imagen
-                },
-                child: Container(
-                  width: 120,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withOpacity(0.2)),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Agregar multimedia',
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
-                  ),
-                ),
-              ),
-
               const SizedBox(height: 48),
               SizedBox(
                 width: double.infinity,

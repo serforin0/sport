@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sport/features/settings/presentation/providers/profile_providers.dart';
 
-class PrivacySettingsPage extends StatefulWidget {
+class PrivacySettingsPage extends ConsumerWidget {
   const PrivacySettingsPage({super.key});
 
   @override
-  State<PrivacySettingsPage> createState() => _PrivacySettingsPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(settingsControllerProvider);
+    final settings = async.valueOrNull;
+    final privacy = settings?.privacy;
 
-class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
-  bool _publicProfile = true;
-  bool _showStats = true;
-  bool _allowMessagesFromAnyone = false;
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
@@ -34,30 +31,38 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
+      body: settings == null
+          ? const Center(child: CircularProgressIndicator(color: Colors.white))
+          : SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _sectionHeader('VISIBILIDAD'),
+            const _SectionHeader('VISIBILIDAD'),
             _PrivacySwitchTile(
               title: 'Perfil público',
               subtitle: 'Cualquier usuario puede ver tu perfil y publicaciones',
-              value: _publicProfile,
-              onChanged: (val) => setState(() => _publicProfile = val),
+              value: privacy!.publicProfile,
+              onChanged: (val) => ref.read(settingsControllerProvider.notifier).updateSettings(
+                    settings.copyWith(privacy: privacy.copyWith(publicProfile: val)),
+                  ),
             ),
             _PrivacySwitchTile(
               title: 'Mostrar estadísticas',
               subtitle: 'Tus seguidores podrán ver tu rendimiento y medallas',
-              value: _showStats,
-              onChanged: (val) => setState(() => _showStats = val),
+              value: privacy.showStats,
+              onChanged: (val) => ref.read(settingsControllerProvider.notifier).updateSettings(
+                    settings.copyWith(privacy: privacy.copyWith(showStats: val)),
+                  ),
             ),
             const Divider(color: Colors.white12, height: 32, indent: 20, endIndent: 20),
-            const _sectionHeader('INTERACCIONES'),
+            const _SectionHeader('INTERACCIONES'),
             _PrivacySwitchTile(
               title: 'Mensajes de desconocidos',
               subtitle: 'Permitir que personas que no sigues te envíen mensajes',
-              value: _allowMessagesFromAnyone,
-              onChanged: (val) => setState(() => _allowMessagesFromAnyone = val),
+              value: privacy.allowMessagesFromAnyone,
+              onChanged: (val) => ref.read(settingsControllerProvider.notifier).updateSettings(
+                    settings.copyWith(privacy: privacy.copyWith(allowMessagesFromAnyone: val)),
+                  ),
             ),
             _PrivacyLinkTile(
               title: 'Usuarios bloqueados',
@@ -76,9 +81,9 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
   }
 }
 
-class _sectionHeader extends StatelessWidget {
+class _SectionHeader extends StatelessWidget {
   final String title;
-  const _sectionHeader(this.title);
+  const _SectionHeader(this.title);
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +125,7 @@ class _PrivacySwitchTile extends StatelessWidget {
       subtitle: Text(subtitle, style: const TextStyle(color: Colors.white38, fontSize: 13)),
       value: value,
       onChanged: onChanged,
-      activeColor: const Color(0xFF3B82F6),
+      activeThumbColor: const Color(0xFF3B82F6),
       inactiveThumbColor: Colors.grey,
       inactiveTrackColor: Colors.white12,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),

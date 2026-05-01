@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sport/features/support/presentation/providers/support_providers.dart';
+import 'contact_support_page.dart';
 
 class HelpSupportPage extends StatelessWidget {
   const HelpSupportPage({super.key});
@@ -40,27 +43,36 @@ class HelpSupportPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Encuentra respuestas rápidas o contacta con nuestro equipo de soporte.',
+              'Contenido desde el servidor (GET /help) y contacto (POST /contact).',
               style: TextStyle(color: Colors.white60, fontSize: 14),
             ),
             const SizedBox(height: 32),
             _SupportOptionTile(
               icon: Icons.help_outline,
               title: 'Centro de Ayuda / FAQ',
-              subtitle: 'Preguntas frecuentes y tutoriales',
-              onTap: () {},
+              subtitle: 'Desde el API',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HelpApiContentPage()),
+              ),
             ),
             _SupportOptionTile(
               icon: Icons.support_agent_outlined,
               title: 'Contactar Soporte',
-              subtitle: 'Chat en vivo o ticket por correo',
-              onTap: () {},
+              subtitle: 'Ticket por correo',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ContactSupportPage()),
+              ),
             ),
             _SupportOptionTile(
               icon: Icons.bug_report_outlined,
               title: 'Reportar un problema',
               subtitle: 'Ayúdanos a mejorar la app',
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ContactSupportPage()),
+              ),
             ),
             _SupportOptionTile(
               icon: Icons.description_outlined,
@@ -103,6 +115,56 @@ class HelpSupportPage extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Contenido de `GET /v1/help`.
+class HelpApiContentPage extends ConsumerWidget {
+  const HelpApiContentPage({super.key});
+
+  static String _formatHelp(dynamic d) {
+    if (d == null) return 'Sin contenido.';
+    if (d is String) return d;
+    if (d is Map) {
+      final buf = StringBuffer();
+      for (final e in d.entries) {
+        buf.writeln('${e.key}: ${e.value}');
+      }
+      return buf.toString();
+    }
+    if (d is List) {
+      return d.map((e) => e.toString()).join('\n\n');
+    }
+    return d.toString();
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(helpContentProvider);
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0F172A),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text('Ayuda', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
+      body: async.when(
+        loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF3B82F6))),
+        error: (e, _) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.white54))),
+        data: (data) => SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: SelectableText(
+            _formatHelp(data),
+            style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.4),
+          ),
         ),
       ),
     );
