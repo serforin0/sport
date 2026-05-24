@@ -70,6 +70,8 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   }
 
   Future<void> _nextStep() async {
+    final isFan = _selectedProfileType == 'fan';
+
     if (_currentStep == 0) {
       if (_firstNameCtrl.text.trim().isEmpty ||
           _lastNameCtrl.text.trim().isEmpty ||
@@ -106,8 +108,19 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
       );
       setState(() => _currentStep++);
     } else {
-      if (_selectedSportIds.isEmpty) {
+      final sports = ref.read(sportsProvider).valueOrNull ?? [];
+      final sportId = _selectedSportIds.isNotEmpty
+          ? _selectedSportIds.first
+          : isFan && sports.isNotEmpty
+              ? sports.first.id
+              : null;
+
+      if (sportId == null && !isFan) {
          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecciona al menos un deporte')));
+        return;
+      }
+      if (sportId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudieron cargar deportes. Intenta de nuevo.')));
         return;
       }
 
@@ -123,12 +136,12 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
             name: '${_firstNameCtrl.text.trim()} ${_lastNameCtrl.text.trim()}',
             countryId: _selectedCountry!.id,
             city: _cityCtrl.text.trim(),
-            sportId: _selectedSportIds.first,
+            sportId: sportId,
             profileType: _selectedProfileType,
             phone: _phoneCtrl.text.trim(),
-            position: _positionCtrl.text.trim(),
-            sportLevel: _selectedSportLevel,
-            currentTeam: _teamCtrl.text.trim(),
+            position: isFan ? null : _positionCtrl.text.trim(),
+            sportLevel: isFan ? null : _selectedSportLevel,
+            currentTeam: isFan ? null : _teamCtrl.text.trim(),
             socialLinks: socialLinks,
             avatarPath: _avatarFile?.path,
           );
@@ -220,6 +233,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                 _StepInterests(
                   selectedIds: _selectedSportIds,
                   selectedLevel: _selectedSportLevel,
+                  isFan: _selectedProfileType == 'fan',
                   positionCtrl: _positionCtrl,
                   teamCtrl: _teamCtrl,
                   instagramCtrl: _instagramCtrl,
@@ -254,7 +268,11 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                   ),
                 ),
                 child: Text(
-                  _currentStep == 2 ? 'COMPLETAR REGISTRO' : 'CONTINUAR',
+                  _currentStep == 2 && _selectedProfileType == 'fan' && _selectedSportIds.isEmpty
+                      ? 'SALTAR Y COMPLETAR'
+                      : _currentStep == 2
+                          ? 'COMPLETAR REGISTRO'
+                          : 'CONTINUAR',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -429,9 +447,9 @@ class _StepContactInfo extends ConsumerWidget {
             data: (list) => Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.05)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<Country>(
@@ -446,7 +464,7 @@ class _StepContactInfo extends ConsumerWidget {
               ),
             ),
             loading: () => const LinearProgressIndicator(),
-            error: (_, __) => const Text('Error al cargar países', style: TextStyle(color: Colors.red)),
+            error: (error, stackTrace) => const Text('Error al cargar países', style: TextStyle(color: Colors.red)),
           ),
           const SizedBox(height: 24),
           _RegField(label: 'Ciudad *', controller: cityCtrl, hint: 'Ej. Santo Domingo'),
@@ -462,9 +480,9 @@ class _StepContactInfo extends ConsumerWidget {
               height: 88,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.05)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
               ),
               child: Row(
                 children: [
@@ -495,6 +513,7 @@ class _StepInterests extends ConsumerWidget {
   final List<String> selectedIds;
   final Function(String) onToggle;
   final String? selectedLevel;
+  final bool isFan;
   final ValueChanged<String?> onLevelChanged;
   final TextEditingController positionCtrl;
   final TextEditingController teamCtrl;
@@ -506,6 +525,7 @@ class _StepInterests extends ConsumerWidget {
     required this.selectedIds,
     required this.onToggle,
     required this.selectedLevel,
+    required this.isFan,
     required this.onLevelChanged,
     required this.positionCtrl,
     required this.teamCtrl,
@@ -528,9 +548,11 @@ class _StepInterests extends ConsumerWidget {
             style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Selecciona los deportes que te interesen.',
-            style: TextStyle(color: Colors.white60, fontSize: 14),
+          Text(
+            isFan
+                ? 'Puedes seleccionar tus deportes favoritos o saltar este paso por ahora.'
+                : 'Selecciona los deportes que te interesen.',
+            style: const TextStyle(color: Colors.white60, fontSize: 14),
           ),
           const SizedBox(height: 32),
           sportsAsync.when(
@@ -543,8 +565,8 @@ class _StepInterests extends ConsumerWidget {
                   label: Text(sport.name),
                   selected: isSelected,
                   onSelected: (_) => onToggle(sport.id),
-                  backgroundColor: Colors.white.withOpacity(0.05),
-                  selectedColor: const Color(0xFF3B82F6).withOpacity(0.3),
+                  backgroundColor: Colors.white.withValues(alpha: 0.05),
+                  selectedColor: const Color(0xFF2563EB),
                   checkmarkColor: Colors.white,
                   labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.white70),
                   shape: StadiumBorder(side: BorderSide(color: isSelected ? const Color(0xFF3B82F6) : Colors.white10)),
@@ -552,27 +574,35 @@ class _StepInterests extends ConsumerWidget {
               }).toList(),
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => const Text('Error al cargar deportes', style: TextStyle(color: Colors.red)),
+            error: (error, stackTrace) => const Text('Error al cargar deportes', style: TextStyle(color: Colors.red)),
           ),
-          const SizedBox(height: 20),
-          _RegField(label: 'Posición', controller: positionCtrl, hint: 'Ingresar posición'),
-          const SizedBox(height: 24),
-          const Text('Nivel deportivo', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          _DarkDropdown<String>(
-            value: selectedLevel,
-            hint: 'Seleccionar nivel',
-            items: const {
-              'beginner': 'Principiante',
-              'amateur': 'Amateur',
-              'semi_pro': 'Semiprofesional',
-              'professional': 'Profesional',
-              'elite': 'Élite',
-            },
-            onChanged: onLevelChanged,
-          ),
-          const SizedBox(height: 20),
-          _RegField(label: 'Equipo actual', controller: teamCtrl, hint: 'Ej. Club Deportivo Central'),
+          if (isFan) ...[
+            const SizedBox(height: 16),
+            const Text(
+              'Como fanático puedes completar el registro sin datos deportivos profesionales.',
+              style: TextStyle(color: Colors.white54, fontSize: 13, height: 1.35),
+            ),
+          ] else ...[
+            const SizedBox(height: 20),
+            _RegField(label: 'Posición', controller: positionCtrl, hint: 'Ingresar posición'),
+            const SizedBox(height: 24),
+            const Text('Nivel deportivo', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            _DarkDropdown<String>(
+              value: selectedLevel,
+              hint: 'Seleccionar nivel',
+              items: const {
+                'beginner': 'Principiante',
+                'amateur': 'Amateur',
+                'semi_pro': 'Semiprofesional',
+                'professional': 'Profesional',
+                'elite': 'Élite',
+              },
+              onChanged: onLevelChanged,
+            ),
+            const SizedBox(height: 20),
+            _RegField(label: 'Equipo actual', controller: teamCtrl, hint: 'Ej. Club Deportivo Central'),
+          ],
           const SizedBox(height: 20),
           _RegField(label: 'Instagram', controller: instagramCtrl, hint: 'https://instagram.com/usuario'),
           const SizedBox(height: 20),
@@ -616,10 +646,10 @@ class _RegField extends StatelessWidget {
             hintStyle: const TextStyle(color: Colors.white24),
             suffixIcon: suffix,
             filled: true,
-            fillColor: Colors.white.withOpacity(0.05),
+            fillColor: Colors.white.withValues(alpha: 0.05),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withOpacity(0.05))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
             focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF3B82F6))),
           ),
         ),
@@ -669,9 +699,9 @@ class _DarkDropdown<T> extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<T>(

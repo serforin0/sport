@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sport/core/config/api_config.dart';
-import 'package:sport/core/network/api_client.dart';
 import 'package:sport/core/providers/shared_preferences_provider.dart';
 
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
@@ -10,7 +8,6 @@ import 'features/auth/presentation/pages/auth_landing_page.dart';
 import 'features/settings/data/datasources/settings_local_datasource.dart';
 import 'features/settings/presentation/providers/profile_providers.dart';
 import 'features/auth/presentation/providers/auth_providers.dart';
-import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/shell/main_shell.dart';
 import 'features/onboarding/presentation/providers/onboarding_providers.dart';
 
@@ -40,21 +37,26 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final onboardingDone = ref.watch(onboardingDoneProvider);
     final authState = ref.watch(authControllerProvider);
+    final cachedUser = authState.valueOrNull;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: onboardingDone.when(
         data: (done) {
           if (!done) return const OnboardingPage();
-          
+
+          if (authState.isLoading) {
+            return cachedUser != null ? const MainShell() : const AuthPage();
+          }
+
           return authState.when(
             data: (user) => user != null ? const MainShell() : const AuthPage(),
-            loading: () => const _Splash(),
-            error: (_, __) => const AuthPage(),
+            loading: () => const AuthPage(),
+            error: (error, stackTrace) => const AuthPage(),
           );
         },
         loading: () => const _Splash(),
-        error: (error, stack) => const _Splash(),
+        error: (error, stackTrace) => const _Splash(),
       ),
     );
   }

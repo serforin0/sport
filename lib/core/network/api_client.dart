@@ -86,6 +86,12 @@ class ApiClient {
     if (e.response != null) {
       return Exception('API Error (${e.response?.statusCode}): ${e.response?.data}');
     }
-    return Exception('Network Error: ${e.message}');
+    final details = [
+      e.type.name,
+      if (e.message != null && e.message!.trim().isNotEmpty) e.message,
+      if (e.error != null) e.error.toString(),
+    ].whereType<String>().join(' - ');
+
+    return Exception('Network Error: ${details.isEmpty ? 'sin detalle' : details}');
   }
 }

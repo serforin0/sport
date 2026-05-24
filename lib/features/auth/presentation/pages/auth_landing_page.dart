@@ -125,7 +125,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                                       onSubmit: () {
                                         ref
                                             .read(authControllerProvider.notifier)
-                                            .signIn(_emailCtrl.text, _passCtrl.text);
+                                            .signIn(_emailCtrl.text.trim(), _passCtrl.text);
                                       },
                                       onSocialGoogle: () {},
                                       onSocialFacebook: () {},
