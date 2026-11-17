@@ -17,7 +17,7 @@ jobs:
       - run: flutter pub get
       - run: dart format --output=none --set-exit-if-changed lib/features/demo lib/features/settings/presentation/pages/invoices_page.dart test/features/demo
       - run: flutter analyze --no-fatal-infos --no-fatal-warnings
-      - run: flutter test test/features/auth/domain test/features/connections/domain test/features/chat test/features/jobs test/features/feed/domain test/features/notifications/presentation test/features/demo --coverage
+      - run: flutter test --coverage
       - name: Enforce 80% line coverage
         run: |
           python3 - <<'PY'

@@ -31,6 +31,14 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
   bool get _canPost => !_isPosting && (_textController.text.trim().isNotEmpty || _media.isNotEmpty);
 
   @override
+  void initState() {
+    super.initState();
+    _textController.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
   void dispose() {
     _textController.dispose();
     super.dispose();
