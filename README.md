@@ -40,6 +40,8 @@ flutter run --dart-define=ENABLE_DEMO_LOGIN=true
 
 ```bash
 flutter test
+# Flujos MVP (auth, conexiones, chat, jobs, feed, demo):
+flutter test test/features/auth/domain test/features/connections/domain test/features/chat/domain test/features/jobs/domain test/features/feed/domain test/features/demo
 flutter analyze
 ```
 
