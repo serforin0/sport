@@ -1,11 +1,9 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/chat_conversation.dart';
 import '../../domain/entities/chat_message.dart';
 import '../providers/chat_providers.dart';
-import '../widgets/chat_conversation_modals.dart';
 import '../widgets/message_bubble.dart';
 
 class ConversationPage extends ConsumerStatefulWidget {
@@ -51,10 +49,85 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
     });
   }
 
+  void _showOptionsMenu() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF163A73),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: Colors.white),
+              title: const Text('Eliminar conversación', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                _handleDeleteChat();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.block, color: Colors.white),
+              title: const Text('Bloquear usuario', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                _handleBlockUser();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleDeleteChat() async {
+    try {
+      await ref.read(chatRepositoryProvider).deleteConversation(widget.conversation.id);
+      ref.invalidate(conversationsProvider);
+      if (!mounted) return;
+      Navigator.pop(context);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo eliminar la conversación')),
+      );
+    }
+  }
+
+  Future<void> _handleBlockUser() async {
+    final userId = widget.conversation.contactUserId;
+    if (userId == null || userId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo identificar al usuario')),
+      );
+      return;
+    }
+    try {
+      await ref.read(chatRepositoryProvider).blockUser(userId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Usuario bloqueado')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo bloquear al usuario')),
+      );
+    }
+  }
+
+  void _showComingSoon() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Esta opción estará disponible próximamente'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final messagesAsync =
-        ref.watch(messagesNotifierProvider(widget.conversation.id));
+    final messagesAsync = ref.watch(
+      messagesNotifierProvider(widget.conversation.id),
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F2A5B),
@@ -74,7 +147,11 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
               border: Border.all(color: Colors.white70),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 22),
+            child: const Icon(
+              Icons.arrow_back_ios_new,
+              color: Colors.white,
+              size: 22,
+            ),
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -108,7 +185,9 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
                     )
                   else
                     Text(
-                      widget.conversation.isOnline ? 'En línea' : 'Desconectado',
+                      widget.conversation.isOnline
+                          ? 'En línea'
+                          : 'Desconectado',
                       style: TextStyle(
                         color: widget.conversation.isOnline
                             ? const Color(0xFF22C55E)
@@ -124,7 +203,7 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.more_vert, color: Colors.white, size: 30),
-            onPressed: () => _showOptionsMenu(context),
+            onPressed: _showOptionsMenu,
           ),
         ],
       ),
@@ -139,7 +218,9 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
                   _scheduleScrollToBottom();
                 }
                 if (messages.isEmpty) {
-                  return _EmptyConversationProfile(conversation: widget.conversation);
+                  return _EmptyConversationProfile(
+                    conversation: widget.conversation,
+                  );
                 }
                 return ListView(
                   controller: _scrollController,
@@ -148,12 +229,13 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
                 );
               },
               loading: () => const Center(
-                child: CircularProgressIndicator(
-                    color: Color(0xFF3B82F6)),
+                child: CircularProgressIndicator(color: Color(0xFF3B82F6)),
               ),
               error: (_, _) => const Center(
-                child: Text('Error cargando mensajes',
-                    style: TextStyle(color: Colors.white38)),
+                child: Text(
+                  'Error cargando mensajes',
+                  style: TextStyle(color: Colors.white38),
+                ),
               ),
             ),
           ),
@@ -162,11 +244,8 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
           SafeArea(
             top: false,
             child: Container(
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-              ),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(color: Colors.transparent),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFF506B99),
@@ -179,7 +258,10 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
                     Expanded(
                       child: TextField(
                         controller: _controller,
-                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
                         maxLines: 4,
                         minLines: 1,
                         textCapitalization: TextCapitalization.sentences,
@@ -187,23 +269,40 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
                         onSubmitted: (_) => _send(),
                         decoration: const InputDecoration(
                           hintText: 'Mensaje',
-                          hintStyle: TextStyle(color: Color(0xFF9AB0CC), fontSize: 14),
+                          hintStyle: TextStyle(
+                            color: Color(0xFF9AB0CC),
+                            fontSize: 14,
+                          ),
                           contentPadding: EdgeInsets.fromLTRB(16, 12, 8, 12),
                           border: InputBorder.none,
                         ),
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.attach_file, color: Colors.white, size: 22),
+                      onPressed: _showComingSoon,
+                      icon: const Icon(
+                        Icons.attach_file,
+                        color: Colors.white54,
+                        size: 22,
+                      ),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
                     ),
                     IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.image_outlined, color: Colors.white, size: 22),
+                      onPressed: _showComingSoon,
+                      icon: const Icon(
+                        Icons.image_outlined,
+                        color: Colors.white54,
+                        size: 22,
+                      ),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
                     ),
                     ValueListenableBuilder<TextEditingValue>(
                       valueListenable: _controller,
@@ -212,9 +311,16 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
                         if (!hasText) return const SizedBox(width: 4);
                         return IconButton(
                           onPressed: _send,
-                          icon: const Icon(Icons.send_rounded, color: Color(0xFF19B5FF), size: 28),
+                          icon: const Icon(
+                            Icons.send_rounded,
+                            color: Color(0xFF19B5FF),
+                            size: 28,
+                          ),
                           padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                          constraints: const BoxConstraints(
+                            minWidth: 40,
+                            minHeight: 40,
+                          ),
                         );
                       },
                     ),
@@ -261,72 +367,6 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
     if (day == yesterday) return 'Ayer';
     return DateFormat('d MMM', 'es').format(day);
   }
-
-  void _showOptionsMenu(BuildContext context) {
-    showChatConversationActionsSheet(
-      context,
-      onDeleteChat: () {
-        _handleDeleteChat();
-      },
-      onBlockUser: () {
-        _handleBlockUser();
-      },
-    );
-  }
-
-  Future<void> _handleDeleteChat() async {
-    final confirmed = await showDeleteChatConfirmDialog(context);
-    if (!confirmed || !mounted) return;
-    try {
-      await ref.read(chatRepositoryProvider).deleteConversation(widget.conversation.id);
-      ref.invalidate(conversationsProvider);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Chat eliminado')),
-      );
-      Navigator.of(context).pop();
-    } catch (e) {
-      if (!mounted) return;
-      final msg = e is DioException
-          ? (e.response?.data?.toString() ?? e.message ?? 'Error de red')
-          : e.toString();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No se pudo eliminar: $msg')),
-      );
-    }
-  }
-
-  Future<void> _handleBlockUser() async {
-    final userId = widget.conversation.contactUserId;
-    if (userId == null || userId.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No se puede bloquear: falta el identificador del usuario.'),
-        ),
-      );
-      return;
-    }
-    final confirmed = await showBlockUserConfirmDialog(context);
-    if (!confirmed || !mounted) return;
-    try {
-      await ref.read(chatRepositoryProvider).blockUser(userId);
-      ref.invalidate(conversationsProvider);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Usuario bloqueado')),
-      );
-      Navigator.of(context).pop();
-    } catch (e) {
-      if (!mounted) return;
-      final msg = e is DioException
-          ? (e.response?.data?.toString() ?? e.message ?? 'Error de red')
-          : e.toString();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No se pudo bloquear: $msg')),
-      );
-    }
-  }
 }
 
 class _ChatDateChip extends StatelessWidget {
@@ -342,14 +382,16 @@ class _ChatDateChip extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFF19B5FF),
+            color: const Color(0xFF0B3A6E),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFF2CB5FF).withValues(alpha: 0.45)),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.18),
+            ),
           ),
           child: Text(
             label,
             style: const TextStyle(
-              color: Color(0xFF2CB5FF),
+              color: Colors.white,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -377,13 +419,21 @@ class _EmptyConversationProfile extends StatelessWidget {
             CircleAvatar(
               radius: 58,
               backgroundColor: Colors.white12,
-              backgroundImage: hasAvatar ? NetworkImage(conversation.contactAvatar) : null,
-              child: hasAvatar ? null : const Icon(Icons.person, color: Colors.white54, size: 58),
+              backgroundImage: hasAvatar
+                  ? NetworkImage(conversation.contactAvatar)
+                  : null,
+              child: hasAvatar
+                  ? null
+                  : const Icon(Icons.person, color: Colors.white54, size: 58),
             ),
             const SizedBox(height: 18),
             Text(
               conversation.contactName,
-              style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+              ),
             ),
             if (conversation.contactSubtitle.isNotEmpty) ...[
               const SizedBox(height: 4),

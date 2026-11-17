@@ -5,6 +5,7 @@ import 'package:sport/features/auth/presentation/providers/auth_providers.dart';
 import 'package:sport/features/feed/presentation/providers/feed_providers.dart';
 import 'package:sport/features/feed/presentation/widgets/post_card.dart';
 import 'package:sport/features/settings/presentation/pages/settings_page.dart';
+import 'package:sport/features/settings/presentation/pages/edit_profile_page.dart';
 import 'package:sport/features/profile/presentation/pages/statistics_page.dart';
 import 'package:sport/features/auth/domain/entities/user.dart';
 
@@ -19,7 +20,9 @@ class ProfilePage extends ConsumerWidget {
     if (user == null) {
       return const Scaffold(
         backgroundColor: Color(0xFF0F172A),
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF3B82F6))),
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xFF3B82F6)),
+        ),
       );
     }
 
@@ -72,23 +75,56 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) => Container(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)))),
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
             const SizedBox(height: 24),
-            const Text('Teléfono', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+            const Text(
+              'Teléfono',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Colors.black87,
+              ),
+            ),
             Text(
-              widget.user.phoneNumber?.isNotEmpty == true ? widget.user.phoneNumber! : 'No disponible',
+              widget.user.phoneNumber?.isNotEmpty == true
+                  ? widget.user.phoneNumber!
+                  : 'No disponible',
               style: const TextStyle(color: Colors.black54, fontSize: 13),
             ),
-            const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider()),
-            const Text('Correo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
-            Text(widget.user.email, style: const TextStyle(color: Colors.black54, fontSize: 14)),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(),
+            ),
+            const Text(
+              'Correo',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Colors.black87,
+              ),
+            ),
+            Text(
+              widget.user.email,
+              style: const TextStyle(color: Colors.black54, fontSize: 14),
+            ),
             const SizedBox(height: 24),
           ],
         ),
@@ -116,7 +152,9 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
                 image: DecorationImage(
                   image: (user.photoUrl != null && user.photoUrl!.isNotEmpty)
                       ? NetworkImage(user.photoUrl!)
-                      : const NetworkImage('https://images.unsplash.com/photo-1542362567-b055002b91f4?q=80&w=2070&auto=format&fit=crop'),
+                      : const NetworkImage(
+                          'https://images.unsplash.com/photo-1542362567-b055002b91f4?q=80&w=2070&auto=format&fit=crop',
+                        ),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -125,7 +163,10 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
                   gradient: LinearGradient(
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
-                    colors: [const Color(0xFF0F172A), Colors.transparent.withValues(alpha: 0.1)],
+                    colors: [
+                      const Color(0xFF0F172A),
+                      Colors.transparent.withValues(alpha: 0.1),
+                    ],
                     stops: const [0.0, 0.4],
                   ),
                 ),
@@ -142,16 +183,20 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _CircleIcon(icon: Icons.chevron_left, onTap: () => Navigator.pop(context)),
+              _CircleIcon(
+                icon: Icons.chevron_left,
+                onTap: () => Navigator.pop(context),
+              ),
               Row(
                 children: [
                   _CircleIcon(
-                    icon: Icons.logout, 
-                    onTap: () => ref.read(authControllerProvider.notifier).signOut(),
+                    icon: Icons.logout,
+                    onTap: () =>
+                        ref.read(authControllerProvider.notifier).signOut(),
                   ),
                   const SizedBox(width: 12),
                   _CircleIcon(
-                    icon: Icons.settings_outlined, 
+                    icon: Icons.settings_outlined,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -176,29 +221,44 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
                   width: double.infinity,
                   decoration: const BoxDecoration(
                     color: Color(0xFF2E4572),
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(30),
+                    ),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 24,
+                  ),
                   child: Column(
                     children: [
                       Text(
                         user.name ?? 'Usuario',
-                        style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         _detailLine(user),
-                        style: TextStyle(color: Colors.blueAccent.shade100, fontSize: 12),
+                        style: TextStyle(
+                          color: Colors.blueAccent.shade100,
+                          fontSize: 12,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 4),
                       if (_dateLine(user).isNotEmpty)
                         Text(
                           _dateLine(user),
-                          style: const TextStyle(color: Colors.white54, fontSize: 11),
+                          style: const TextStyle(
+                            color: Colors.white54,
+                            fontSize: 11,
+                          ),
                         ),
                       const SizedBox(height: 24),
-                      
+
                       Row(
                         children: [
                           Expanded(
@@ -210,8 +270,13 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: _OutlinedButton(
-                              label: 'Enviar mensaje',
-                              onTap: () {},
+                              label: 'Editar perfil',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const EditProfilePage(),
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -221,8 +286,14 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
                       const _SectionHeader(title: 'Acerca de'),
                       const SizedBox(height: 12),
                       Text(
-                        user.bio ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna. Pellentesque sit amet sapien fringill.',
-                        style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
+                        user.bio?.trim().isNotEmpty == true
+                            ? user.bio!
+                            : 'Aún no has agregado una biografía. Completa tu perfil para que otros usuarios conozcan tu trayectoria deportiva.',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13,
+                          height: 1.5,
+                        ),
                       ),
 
                       const SizedBox(height: 32),
@@ -234,16 +305,29 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
                         child: TextButton(
                           onPressed: () => Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => StatisticsPage(
-                              userName: user.name ?? 'Usuario',
-                              userRole: _profileTypeLabel(user.profileType),
-                              userLocation: [user.city, user.country]
-                                  .where((item) => item?.isNotEmpty == true)
-                                  .join(', '),
-                              photoUrl: (user.photoUrl != null && user.photoUrl!.isNotEmpty) ? user.photoUrl : null,
-                            )),
+                            MaterialPageRoute(
+                              builder: (_) => StatisticsPage(
+                                userName: user.name ?? 'Usuario',
+                                userRole: _profileTypeLabel(user.profileType),
+                                userLocation: [user.city, user.country]
+                                    .where((item) => item?.isNotEmpty == true)
+                                    .join(', '),
+                                photoUrl:
+                                    (user.photoUrl != null &&
+                                        user.photoUrl!.isNotEmpty)
+                                    ? user.photoUrl
+                                    : null,
+                                stats: user.stats,
+                              ),
+                            ),
                           ),
-                          child: const Text('Mostrar más estadísticas →', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                          child: const Text(
+                            'Mostrar más estadísticas →',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
                       ),
 
@@ -252,9 +336,21 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _PillTab(label: 'Experiencia', isActive: _activeTab == 0, onTap: () => setState(() => _activeTab = 0)),
-                          _PillTab(label: 'Logros', isActive: _activeTab == 1, onTap: () => setState(() => _activeTab = 1)),
-                          _PillTab(label: 'Publicaciones', isActive: _activeTab == 2, onTap: () => setState(() => _activeTab = 2)),
+                          _PillTab(
+                            label: 'Experiencia',
+                            isActive: _activeTab == 0,
+                            onTap: () => setState(() => _activeTab = 0),
+                          ),
+                          _PillTab(
+                            label: 'Logros',
+                            isActive: _activeTab == 1,
+                            onTap: () => setState(() => _activeTab = 1),
+                          ),
+                          _PillTab(
+                            label: 'Publicaciones',
+                            isActive: _activeTab == 2,
+                            onTap: () => setState(() => _activeTab = 2),
+                          ),
                         ],
                       ),
 
@@ -273,10 +369,14 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
 
   Widget _buildTabContent() {
     switch (_activeTab) {
-      case 0: return _ExperienceContent();
-      case 1: return _AchievementsContent();
-      case 2: return _PostsContent(userId: widget.user.id);
-      default: return const SizedBox.shrink();
+      case 0:
+        return _ExperienceContent(user: widget.user);
+      case 1:
+        return _AchievementsContent(user: widget.user);
+      case 2:
+        return _PostsContent(userId: widget.user.id);
+      default:
+        return const SizedBox.shrink();
     }
   }
 }
@@ -293,7 +393,11 @@ class _SectionHeader extends StatelessWidget {
       alignment: Alignment.centerLeft,
       child: Text(
         title,
-        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -307,10 +411,12 @@ class _DetailedStatsGrid extends StatelessWidget {
   List<Map<String, String>> _items() {
     final parsed = (stats ?? [])
         .whereType<Map>()
-        .map((item) => {
-              'value': (item['value'] ?? '').toString(),
-              'label': (item['label'] ?? '').toString(),
-            })
+        .map(
+          (item) => {
+            'value': (item['value'] ?? '').toString(),
+            'label': (item['label'] ?? '').toString(),
+          },
+        )
         .where((item) => item['value']!.isNotEmpty || item['label']!.isNotEmpty)
         .toList();
     if (parsed.isNotEmpty) return parsed;
@@ -334,7 +440,12 @@ class _DetailedStatsGrid extends StatelessWidget {
       childAspectRatio: 1.4,
       children: items
           .take(6)
-          .map((item) => _StatBox(value: item['value'] ?? '0', label: item['label'] ?? 'Dato'))
+          .map(
+            (item) => _StatBox(
+              value: item['value'] ?? '0',
+              label: item['label'] ?? 'Dato',
+            ),
+          )
           .toList(),
     );
   }
@@ -348,13 +459,26 @@ class _StatBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
           const SizedBox(height: 2),
-          Text(label, style: const TextStyle(color: Colors.white38, fontSize: 10)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white38, fontSize: 10),
+          ),
         ],
       ),
     );
@@ -365,7 +489,11 @@ class _PillTab extends StatelessWidget {
   final String label;
   final bool isActive;
   final VoidCallback onTap;
-  const _PillTab({required this.label, required this.isActive, required this.onTap});
+  const _PillTab({
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -380,7 +508,11 @@ class _PillTab extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(color: Colors.white, fontWeight: isActive ? FontWeight.bold : FontWeight.normal, fontSize: 12),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            fontSize: 12,
+          ),
         ),
       ),
     );
@@ -388,29 +520,53 @@ class _PillTab extends StatelessWidget {
 }
 
 class _ExperienceContent extends StatelessWidget {
+  final User user;
+
+  const _ExperienceContent({required this.user});
+
   @override
   Widget build(BuildContext context) {
+    final items = (user.experience ?? []).whereType<Map>().toList();
+    if (items.isEmpty) {
+      return const _ProfileEmptyState(
+        title: 'Sin experiencia registrada',
+        message:
+            'Agrega tu equipo actual, trayectoria o torneos desde Editar perfil.',
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Información deportiva', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+        const Text(
+          'Información deportiva',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+          ),
+        ),
         const SizedBox(height: 16),
-        _TimelineItem(
-          title: 'Piloto Formula 1',
-          subtitle: 'Equipo o Club: Sauber',
-          date: 'Abril 2022 - Actualmente • 2 años',
-          description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna.',
-          trainer: 'Max Verstappen',
-          isFirst: true,
-        ),
-        _TimelineItem(
-          title: 'Piloto Formula 1',
-          subtitle: 'Equipo o Club: Mercedes',
-          date: 'Enero 2022 - Abril 2022 • 3 meses',
-          description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna.',
-          trainer: 'Fernando Alonso',
-          isLast: true,
-        ),
+        for (var i = 0; i < items.length; i++)
+          _TimelineItem(
+            title:
+                (items[i]['title'] ??
+                        items[i]['role'] ??
+                        'Experiencia deportiva')
+                    .toString(),
+            subtitle:
+                (items[i]['subtitle'] ??
+                        items[i]['team'] ??
+                        user.currentTeam ??
+                        '')
+                    .toString(),
+            date: (items[i]['date'] ?? items[i]['period'] ?? '').toString(),
+            description: (items[i]['description'] ?? '').toString(),
+            trainer: (items[i]['trainer'] ?? items[i]['coach'] ?? '')
+                .toString(),
+            isFirst: i == 0,
+            isLast: i == items.length - 1,
+          ),
       ],
     );
   }
@@ -425,7 +581,15 @@ class _TimelineItem extends StatelessWidget {
   final bool isFirst;
   final bool isLast;
 
-  const _TimelineItem({required this.title, required this.subtitle, required this.date, required this.description, required this.trainer, this.isFirst = false, this.isLast = false});
+  const _TimelineItem({
+    required this.title,
+    required this.subtitle,
+    required this.date,
+    required this.description,
+    required this.trainer,
+    this.isFirst = false,
+    this.isLast = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -435,8 +599,16 @@ class _TimelineItem extends StatelessWidget {
         children: [
           Column(
             children: [
-              Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
-              if (!isLast) Expanded(child: Container(width: 2, color: Colors.white24)),
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              if (!isLast)
+                Expanded(child: Container(width: 2, color: Colors.white24)),
             ],
           ),
           const SizedBox(width: 16),
@@ -444,13 +616,50 @@ class _TimelineItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Color(0xFF2CB5FF), fontWeight: FontWeight.bold, fontSize: 13)),
-                Text(subtitle, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-                Text(date, style: const TextStyle(color: Colors.white54, fontSize: 11)),
-                const SizedBox(height: 8),
-                Text(description, style: const TextStyle(color: Colors.white70, fontSize: 12, height: 1.4)),
-                const SizedBox(height: 8),
-                Text('Entrenador: $trainer', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color(0xFF2CB5FF),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+                if (subtitle.isNotEmpty)
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                if (date.isNotEmpty)
+                  Text(
+                    date,
+                    style: const TextStyle(color: Colors.white54, fontSize: 11),
+                  ),
+                if (description.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+                if (trainer.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Entrenador: $trainer',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
               ],
             ),
@@ -462,30 +671,40 @@ class _TimelineItem extends StatelessWidget {
 }
 
 class _AchievementsContent extends StatelessWidget {
+  final User user;
+
+  const _AchievementsContent({required this.user});
+
   @override
   Widget build(BuildContext context) {
+    final items = (user.achievements ?? []).whereType<Map>().toList();
+    if (items.isEmpty) {
+      return const _ProfileEmptyState(
+        title: 'Sin logros registrados',
+        message:
+            'Agrega premios, torneos o fotografías deportivas desde Editar perfil.',
+      );
+    }
+
     return Column(
       children: [
-        _TimelineAchievement(
-          title: 'Gran Premio de Malasia',
-          date: 'Enero 2023',
-          images: const [
-            'https://images.unsplash.com/photo-1578269174936-2709b6aeb913?q=80&w=2071&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=1974&auto=format&fit=crop',
-          ],
-          isFirst: true,
-        ),
-        _TimelineAchievement(
-          title: 'Novato del año • Autosport Awards',
-          date: 'Abril 2022',
-          isCert: true,
-        ),
-        _TimelineAchievement(
-          title: 'Excelencia • Ferrari Driver Academy',
-          date: 'Abril 2020',
-          images: const ['https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop'],
-          isLast: true,
-        ),
+        for (var i = 0; i < items.length; i++)
+          _TimelineAchievement(
+            title: (items[i]['title'] ?? items[i]['name'] ?? 'Logro deportivo')
+                .toString(),
+            date: (items[i]['date'] ?? items[i]['year'] ?? '').toString(),
+            images: (items[i]['images'] is List)
+                ? (items[i]['images'] as List)
+                      .map((image) => image.toString())
+                      .where((image) => image.isNotEmpty)
+                      .toList()
+                : null,
+            isCert:
+                items[i]['is_cert'] == true ||
+                items[i]['type'] == 'certificate',
+            isFirst: i == 0,
+            isLast: i == items.length - 1,
+          ),
       ],
     );
   }
@@ -499,7 +718,14 @@ class _TimelineAchievement extends StatelessWidget {
   final bool isFirst;
   final bool isLast;
 
-  const _TimelineAchievement({required this.title, required this.date, this.images, this.isCert = false, this.isFirst = false, this.isLast = false});
+  const _TimelineAchievement({
+    required this.title,
+    required this.date,
+    this.images,
+    this.isCert = false,
+    this.isFirst = false,
+    this.isLast = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -509,8 +735,16 @@ class _TimelineAchievement extends StatelessWidget {
         children: [
           Column(
             children: [
-              Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
-              if (!isLast) Expanded(child: Container(width: 2, color: Colors.white24)),
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              if (!isLast)
+                Expanded(child: Container(width: 2, color: Colors.white24)),
             ],
           ),
           const SizedBox(width: 16),
@@ -518,8 +752,19 @@ class _TimelineAchievement extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Color(0xFF2CB5FF), fontWeight: FontWeight.bold, fontSize: 13)),
-                Text(date, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color(0xFF2CB5FF),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+                if (date.isNotEmpty)
+                  Text(
+                    date,
+                    style: const TextStyle(color: Colors.white54, fontSize: 11),
+                  ),
                 const SizedBox(height: 12),
                 if (images != null)
                   SizedBox(
@@ -529,17 +774,75 @@ class _TimelineAchievement extends StatelessWidget {
                       itemCount: images!.length,
                       itemBuilder: (context, i) => Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.network(images![i], width: 140, fit: BoxFit.cover)),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            images![i],
+                            width: 140,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 if (isCert)
-                   ClipRRect(
-                     borderRadius: BorderRadius.circular(8),
-                     child: Image.network('https://images.unsplash.com/photo-1606326666490-45757474e78a?q=80&w=2070&auto=format&fit=crop', height: 120, width: 180, fit: BoxFit.cover),
-                   ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 180,
+                      height: 120,
+                      color: Colors.white.withValues(alpha: 0.08),
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        Icons.workspace_premium_outlined,
+                        color: Colors.white38,
+                        size: 42,
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 32),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileEmptyState extends StatelessWidget {
+  final String title;
+  final String message;
+
+  const _ProfileEmptyState({required this.title, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            message,
+            style: const TextStyle(
+              color: Colors.white60,
+              fontSize: 12,
+              height: 1.35,
             ),
           ),
         ],
@@ -560,7 +863,14 @@ class _PostsContent extends ConsumerWidget {
       children: [
         postsAsync.when(
           data: (posts) {
-            if (posts.isEmpty) return const Center(child: Text('No hay publicaciones', style: TextStyle(color: Colors.white38)));
+            if (posts.isEmpty) {
+              return const Center(
+                child: Text(
+                  'No hay publicaciones',
+                  style: TextStyle(color: Colors.white38),
+                ),
+              );
+            }
             return Column(
               children: [
                 if (posts.isNotEmpty) ...[
@@ -568,7 +878,9 @@ class _PostsContent extends ConsumerWidget {
                     children: [
                       Expanded(
                         child: _PostGridImage(
-                          url: (posts[0].imageUrl != null && posts[0].imageUrl!.isNotEmpty)
+                          url:
+                              (posts[0].imageUrl != null &&
+                                  posts[0].imageUrl!.isNotEmpty)
                               ? posts[0].imageUrl!
                               : 'https://images.unsplash.com/photo-1542362567-b055002b91f4?q=80&w=2070&auto=format&fit=crop',
                         ),
@@ -576,7 +888,10 @@ class _PostsContent extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: _PostGridImage(
-                          url: (posts.length > 1 && posts[1].imageUrl != null && posts[1].imageUrl!.isNotEmpty)
+                          url:
+                              (posts.length > 1 &&
+                                  posts[1].imageUrl != null &&
+                                  posts[1].imageUrl!.isNotEmpty)
                               ? posts[1].imageUrl!
                               : '',
                         ),
@@ -585,7 +900,10 @@ class _PostsContent extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   _PostGridImage(
-                    url: (posts.length > 2 && posts[2].imageUrl != null && posts[2].imageUrl!.isNotEmpty)
+                    url:
+                        (posts.length > 2 &&
+                            posts[2].imageUrl != null &&
+                            posts[2].imageUrl!.isNotEmpty)
                         ? posts[2].imageUrl!
                         : '',
                     height: 180,
@@ -597,7 +915,12 @@ class _PostsContent extends ConsumerWidget {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => const Center(child: Text('Error cargando posts', style: TextStyle(color: Colors.white38))),
+          error: (_, _) => const Center(
+            child: Text(
+              'Error cargando posts',
+              style: TextStyle(color: Colors.white38),
+            ),
+          ),
         ),
       ],
     );
@@ -619,7 +942,10 @@ class _PostGridImage extends StatelessWidget {
         height: height,
         width: double.infinity,
         fit: BoxFit.cover,
-        errorWidget: (_, _, _) => Container(color: Colors.white.withValues(alpha: 0.05), child: const Icon(Icons.image, color: Colors.white12)),
+        errorWidget: (_, _, _) => Container(
+          color: Colors.white.withValues(alpha: 0.05),
+          child: const Icon(Icons.image, color: Colors.white12),
+        ),
       ),
     );
   }
@@ -637,10 +963,20 @@ class _GradientButton extends StatelessWidget {
       child: Container(
         height: 48,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [Color(0xFF4A8BF5), Color(0xFF2C65E1)]),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4A8BF5), Color(0xFF2C65E1)],
+          ),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Center(child: Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -661,7 +997,15 @@ class _OutlinedButton extends StatelessWidget {
           border: Border.all(color: Colors.white70),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Center(child: Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -689,4 +1033,3 @@ class _CircleIcon extends StatelessWidget {
     );
   }
 }
-

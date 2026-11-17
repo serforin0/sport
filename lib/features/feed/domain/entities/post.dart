@@ -22,6 +22,7 @@ class Post {
   final String? videoUrl;
   final DateTime createdAt;
   final List<String> likes; // User IDs
+  final List<String> likeNames;
   final List<Comment> comments;
   final String? location;
   final String? eventName;
@@ -34,6 +35,7 @@ class Post {
     this.videoUrl,
     required this.createdAt,
     this.likes = const [],
+    this.likeNames = const [],
     this.comments = const [],
     this.location,
     this.eventName,
@@ -44,4 +46,14 @@ class Post {
   bool isLikedBy(String userId) => likes.contains(userId);
   int get likeCount => likes.length;
   int get commentCount => comments.length;
+
+  String get likeSummary {
+    if (likeCount == 0) return '';
+    final named = likeNames.where((n) => n.trim().isNotEmpty);
+    final name = named.isNotEmpty ? named.first : 'Alguien';
+    if (likeCount == 1) {
+      return 'Le ha gustado a $name';
+    }
+    return 'Le ha gustado a $name y otros ${likeCount - 1} usuarios';
+  }
 }

@@ -47,7 +47,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
 
     setState(() => _isSubmittingComment = true);
     await ref.read(feedProvider.notifier).addComment(widget.post.id, text);
-    
+
     if (mounted) {
       _commentController.clear();
       setState(() => _isSubmittingComment = false);
@@ -75,34 +75,10 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     return detail.isEmpty ? 'Perfil deportivo' : detail;
   }
 
-  void _showPostOptions() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) => SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 14, 24, 26),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 72,
-                  height: 6,
-                  decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(10)),
-                ),
-              ),
-              const SizedBox(height: 22),
-              ListTile(
-                leading: const Icon(Icons.delete_outline, color: Color(0xFF2D2D2D), size: 28),
-                title: const Text('Eliminar publicación', style: TextStyle(color: Color(0xFF2D2D2D), fontSize: 20)),
-                onTap: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-        ),
+  void _showComingSoon() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Esta opción estará disponible próximamente'),
       ),
     );
   }
@@ -110,10 +86,12 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
   @override
   Widget build(BuildContext context) {
     final feedAsync = ref.watch(feedProvider);
-    final post = feedAsync.valueOrNull?.firstWhere(
-      (p) => p.id == widget.post.id,
-      orElse: () => widget.post,
-    ) ?? widget.post;
+    final post =
+        feedAsync.valueOrNull?.firstWhere(
+          (p) => p.id == widget.post.id,
+          orElse: () => widget.post,
+        ) ??
+        widget.post;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F2A5B),
@@ -131,21 +109,24 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white70),
             ),
-            child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 22),
+            child: const Icon(
+              Icons.arrow_back_ios_new,
+              color: Colors.white,
+              size: 22,
+            ),
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Publicación',
-          style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.white, size: 28),
-            onPressed: _showPostOptions,
-          ),
-        ],
+        actions: const [],
       ),
       body: Column(
         children: [
@@ -182,7 +163,13 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(_authorDetailLine(post), style: const TextStyle(color: Color(0xFF23A6E8), fontSize: 13)),
+                            Text(
+                              _authorDetailLine(post),
+                              style: const TextStyle(
+                                color: Color(0xFF23A6E8),
+                                fontSize: 13,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -196,20 +183,37 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF3B82F6).withValues(alpha: 0.15),
+                          color: const Color(
+                            0xFF3B82F6,
+                          ).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xFF3B82F6).withValues(alpha: 0.3)),
+                          border: Border.all(
+                            color: const Color(
+                              0xFF3B82F6,
+                            ).withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.emoji_events_outlined, color: Color(0xFF60A5FA), size: 12),
+                            const Icon(
+                              Icons.emoji_events_outlined,
+                              color: Color(0xFF60A5FA),
+                              size: 12,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               post.eventName!,
-                              style: const TextStyle(color: Color(0xFF60A5FA), fontSize: 11, fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                color: Color(0xFF60A5FA),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
@@ -239,12 +243,18 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                     children: [
                       Text(
                         _formatTime(post.createdAt),
-                        style: const TextStyle(color: Colors.white54, fontSize: 13),
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 13,
+                        ),
                       ),
                       const Spacer(),
                       Text(
                         '${post.comments.length} Comentarios',
-                        style: const TextStyle(color: Colors.white54, fontSize: 13),
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),
@@ -254,8 +264,11 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                   // Like Status Text
                   if (post.likeCount > 0)
                     Text(
-                      'Le ha gustado a ${post.likes.first} y otros ${post.likeCount - 1}',
-                      style: const TextStyle(color: Colors.white60, fontSize: 13),
+                      post.likeSummary,
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 13,
+                      ),
                     ),
 
                   const SizedBox(height: 16),
@@ -264,7 +277,9 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _ActionButton(
-                        icon: _isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                        icon: _isLiked
+                            ? Icons.thumb_up
+                            : Icons.thumb_up_outlined,
                         label: 'Me gusta',
                         isSelected: _isLiked,
                         onTap: _handleLike,
@@ -277,7 +292,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                       _ActionButton(
                         icon: Icons.send_outlined,
                         label: 'Compartir',
-                        onTap: () {},
+                        onTap: _showComingSoon,
                       ),
                     ],
                   ),
@@ -328,9 +343,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
               top: 12,
               bottom: MediaQuery.of(context).padding.bottom + 12,
             ),
-            decoration: const BoxDecoration(
-              color: Color(0xFF506B99),
-            ),
+            decoration: const BoxDecoration(color: Color(0xFF506B99)),
             child: Row(
               children: [
                 const CircleAvatar(
@@ -350,7 +363,10 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                       filled: true,
                       fillColor: Colors.transparent,
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                     ),
                     onSubmitted: (_) => _submitComment(),
                   ),
@@ -360,7 +376,9 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                   child: Text(
                     'Publicar',
                     style: TextStyle(
-                      color: _isSubmittingComment ? Colors.grey : Colors.white70,
+                      color: _isSubmittingComment
+                          ? Colors.grey
+                          : Colors.white70,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -380,19 +398,29 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
         child: _buildImage(images.first, double.infinity, 300),
       );
     }
-    
+
     if (images.length == 2) {
       return Row(
         children: [
-          Expanded(child: ClipRRect(
-            borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)),
-            child: _buildImage(images[0], double.infinity, 200),
-          )),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                bottomLeft: Radius.circular(12),
+              ),
+              child: _buildImage(images[0], double.infinity, 200),
+            ),
+          ),
           const SizedBox(width: 4),
-          Expanded(child: ClipRRect(
-            borderRadius: const BorderRadius.only(topRight: Radius.circular(12), bottomRight: Radius.circular(12)),
-            child: _buildImage(images[1], double.infinity, 200),
-          )),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(12),
+                bottomRight: Radius.circular(12),
+              ),
+              child: _buildImage(images[1], double.infinity, 200),
+            ),
+          ),
         ],
       );
     }
@@ -402,21 +430,36 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
       children: [
         Row(
           children: [
-            Expanded(child: ClipRRect(
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(12)),
-              child: _buildImage(images[0], double.infinity, 150),
-            )),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                ),
+                child: _buildImage(images[0], double.infinity, 150),
+              ),
+            ),
             const SizedBox(width: 4),
-            Expanded(child: ClipRRect(
-              borderRadius: const BorderRadius.only(topRight: Radius.circular(12)),
-              child: _buildImage(images[1], double.infinity, 150),
-            )),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(12),
+                ),
+                child: _buildImage(images[1], double.infinity, 150),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 4),
         ClipRRect(
-          borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
-          child: _buildImage(images.length > 2 ? images[2] : images[0], double.infinity, 180),
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(12),
+            bottomRight: Radius.circular(12),
+          ),
+          child: _buildImage(
+            images.length > 2 ? images[2] : images[0],
+            double.infinity,
+            180,
+          ),
         ),
       ],
     );
@@ -445,7 +488,9 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     return Container(
       height: height,
       color: Colors.white12,
-      child: const Center(child: Icon(Icons.image_not_supported, color: Colors.white24)),
+      child: const Center(
+        child: Icon(Icons.image_not_supported, color: Colors.white24),
+      ),
     );
   }
 }
@@ -470,7 +515,11 @@ class _ActionButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: isSelected ? const Color(0xFFFFB547) : Colors.white70, size: 16),
+          Icon(
+            icon,
+            color: isSelected ? const Color(0xFFFFB547) : Colors.white70,
+            size: 16,
+          ),
           const SizedBox(width: 6),
           Text(
             label,
@@ -523,36 +572,67 @@ class _CommentItem extends StatelessWidget {
                   children: [
                     Text(
                       comment.author.name ?? 'Usuario',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
                     ),
                     const Text(' · ', style: TextStyle(color: Colors.white38)),
                     Text(
                       '2 días', // Simplified
-                      style: const TextStyle(color: Colors.white38, fontSize: 13),
+                      style: const TextStyle(
+                        color: Colors.white38,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
                 if (detail.isNotEmpty)
                   Text(
                     detail,
-                    style: const TextStyle(color: Color(0xFF23A6E8), fontSize: 13),
+                    style: const TextStyle(
+                      color: Color(0xFF23A6E8),
+                      fontSize: 13,
+                    ),
                   ),
                 const SizedBox(height: 6),
                 Text(
                   comment.content,
-                  style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.4),
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.chat_bubble_outline, color: Colors.white54, size: 14),
-                    SizedBox(width: 4),
-                    Text(
-                      'Responder',
-                      style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold, fontSize: 13),
+                InkWell(
+                  onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Las respuestas estarán disponibles próximamente',
+                      ),
                     ),
-                  ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.chat_bubble_outline,
+                        color: Colors.white54,
+                        size: 14,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        'Responder',
+                        style: TextStyle(
+                          color: Colors.white54,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

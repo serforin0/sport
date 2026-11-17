@@ -30,7 +30,12 @@ class NotificationsRemoteDataSource {
     return NotificationType.newPost;
   }
 
-  AppNotification _fromJson(Map<String, dynamic> m) {
+  AppNotification _fromJson(Map<String, dynamic> raw) {
+    final nested = raw['data'];
+    final m = <String, dynamic>{...raw};
+    if (nested is Map) {
+      m.addAll(Map<String, dynamic>.from(nested));
+    }
     final from = m['from_user'] ?? m['user'] ?? m['author'];
     String authorName = 'Usuario';
     String? photo;
@@ -40,11 +45,17 @@ class NotificationsRemoteDataSource {
       authorName = fm['name']?.toString() ??
           '${fm['first_name'] ?? ''} ${fm['last_name'] ?? ''}'.trim();
       if (authorName.isEmpty) authorName = 'Usuario';
-      photo = fm['avatar']?.toString() ?? fm['avatar_url']?.toString() ?? fm['photo_url']?.toString();
+      final avatar = fm['avatar'];
+      photo = avatar is Map
+          ? avatar['url']?.toString()
+          : fm['avatar']?.toString() ?? fm['avatar_url']?.toString() ?? fm['photo_url']?.toString();
       role = fm['role']?.toString() ?? 'Deportista';
+    } else if (m['title'] != null) {
+      authorName = m['title'].toString();
     }
 
     final read = m['read_at'] != null || m['is_read'] == true || m['read'] == true;
+    final body = m['body']?.toString() ?? m['message']?.toString();
 
     return AppNotification(
       id: m['id']?.toString() ?? '',
@@ -56,6 +67,7 @@ class NotificationsRemoteDataSource {
       createdAt: _parseDate(m['created_at'] ?? m['sent_at']),
       isRead: read,
       relatedId: m['related_id']?.toString() ?? m['post_id']?.toString() ?? m['event_id']?.toString() ?? m['subject_id']?.toString(),
+      body: body,
     );
   }
 

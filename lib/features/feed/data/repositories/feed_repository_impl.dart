@@ -40,6 +40,13 @@ class FeedRepositoryImpl implements FeedRepository {
     return Options(headers: {'Authorization': 'Bearer $t'});
   }
 
+  String _mysqlDateTime(DateTime value) {
+    final local = value.toLocal();
+    String two(int number) => number.toString().padLeft(2, '0');
+    return '${local.year}-${two(local.month)}-${two(local.day)} '
+        '${two(local.hour)}:${two(local.minute)}:${two(local.second)}';
+  }
+
   @override
   Future<Result<List<Post>>> getPosts({int page = 0, int limit = 10, String? userId}) async {
     if (_token == null) {
@@ -144,7 +151,7 @@ class FeedRepositoryImpl implements FeedRepository {
             : post.description,
         'body': post.description,
         'status': 'published',
-        'published_at': DateTime.now().toIso8601String(),
+        'published_at': _mysqlDateTime(DateTime.now()),
         if (post.location != null) 'location': post.location,
         if (post.eventName != null) 'event_name': post.eventName,
       });

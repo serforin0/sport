@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sport/core/config/api_config.dart';
 import '../providers/auth_providers.dart';
 import 'registration_page.dart';
 import 'package:sport/core/widgets/video_background.dart';
@@ -11,10 +12,12 @@ class AuthPage extends ConsumerStatefulWidget {
     super.key,
     this.initialMode = AuthMode.landing,
     this.background,
+    this.enableDemoLogin = kEnableDemoLogin,
   });
 
   final AuthMode initialMode;
   final Widget? background;
+  final bool enableDemoLogin;
 
   @override
   ConsumerState<AuthPage> createState() => _AuthPageState();
@@ -45,7 +48,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bg = widget.background ?? _DefaultBackground();
+    final bg = widget.background ?? const _DefaultBackground();
     final authState = ref.watch(authControllerProvider);
 
     // Listen for errors and show snackbar, and handle navigation success fallback
@@ -55,9 +58,9 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           // No manual navigation here. main.dart handles the screen swap via state.
         },
         error: (err, _) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(err.toString())),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(err.toString())));
         },
       );
     });
@@ -71,7 +74,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           if (authState.isLoading)
             const Center(child: CircularProgressIndicator(color: Colors.white)),
           SafeArea(
-// ...
+            // ...
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 22),
               child: Column(
@@ -124,8 +127,15 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                                       onForgot: () {},
                                       onSubmit: () {
                                         ref
-                                            .read(authControllerProvider.notifier)
-                                            .signIn(_emailCtrl.text.trim(), _passCtrl.text);
+                                            .read(
+                                              authControllerProvider.notifier,
+                                            )
+                                            .signIn(
+                                              _emailCtrl.text
+                                                  .trim()
+                                                  .toLowerCase(),
+                                              _passCtrl.text,
+                                            );
                                       },
                                       onSocialGoogle: () {},
                                       onSocialFacebook: () {},
@@ -151,6 +161,14 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                                       onGoogle: () {},
                                       onFacebook: () {},
                                       onApple: () {},
+                                      onDemoLogin: widget.enableDemoLogin
+                                          ? () => ref
+                                                .read(
+                                                  authControllerProvider
+                                                      .notifier,
+                                                )
+                                                .signInAsDemoUser()
+                                          : null,
                                     ),
                             ),
                           ),
@@ -181,6 +199,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
 }
 
 class _DefaultBackground extends StatelessWidget {
+  const _DefaultBackground();
+
   @override
   Widget build(BuildContext context) {
     return VideoBackground(assetPath: 'assets/videos/login_bg.mp4');
@@ -193,6 +213,7 @@ class _Landing extends StatelessWidget {
   final VoidCallback onGoogle;
   final VoidCallback onFacebook;
   final VoidCallback onApple;
+  final VoidCallback? onDemoLogin;
 
   const _Landing({
     super.key,
@@ -201,6 +222,7 @@ class _Landing extends StatelessWidget {
     required this.onGoogle,
     required this.onFacebook,
     required this.onApple,
+    this.onDemoLogin,
   });
 
   @override
@@ -221,6 +243,14 @@ class _Landing extends StatelessWidget {
             backgroundColor: const Color(0xFF3B82F6), // Azul claro
             onTap: onRegisterEmail,
           ),
+          if (onDemoLogin != null) ...[
+            const SizedBox(height: 12),
+            _PrimaryButton(
+              text: 'USUARIO DE PRUEBA',
+              backgroundColor: const Color(0xFF0F766E),
+              onTap: onDemoLogin!,
+            ),
+          ],
           const SizedBox(height: 32),
           const Row(
             children: [
@@ -467,7 +497,8 @@ class _PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? Colors.blue.withValues(alpha: 0.75),
+          backgroundColor:
+              backgroundColor ?? Colors.blue.withValues(alpha: 0.75),
           foregroundColor: Colors.white,
           shape: const StadiumBorder(),
           elevation: 0,

@@ -1,0 +1,42 @@
+name: Flutter CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, master, ultimos-cambios/fixer]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed lib/features/demo lib/features/settings/presentation/pages/invoices_page.dart test/features/demo
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - run: flutter test test/features/demo --coverage
+      - name: Enforce 80% line coverage
+        run: |
+          python3 - <<'PY'
+          lines = open("coverage/lcov.info").read().splitlines()
+          source = None
+          found = hit = 0
+          for line in lines:
+              if line.startswith("SF:"):
+                  source = line[3:]
+              elif line.startswith("LF:") and source and "/features/demo/" in source:
+                  found += int(line[3:])
+              elif line.startswith("LH:") and source and "/features/demo/" in source:
+                  hit += int(line[3:])
+          coverage = 100 * hit / found if found else 0
+          print(f"Demo coverage: {coverage:.2f}% ({hit}/{found})")
+          raise SystemExit(0 if coverage >= 80 else 1)
+          PY
+      - run: flutter build apk --release --dart-define=ENABLE_DEMO_LOGIN=true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hubsport-demo-apk
+          path: build/app/outputs/flutter-apk/app-release.apk

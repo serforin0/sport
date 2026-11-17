@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sport/features/auth/domain/entities/meta.dart';
 import 'package:sport/features/auth/presentation/providers/meta_providers.dart';
 import 'package:sport/features/sponsorships/presentation/providers/sponsorships_providers.dart';
+import 'package:sport/features/demo/presentation/widgets/demo_badge.dart';
 
 class CreateSponsorshipPage extends ConsumerStatefulWidget {
   const CreateSponsorshipPage({super.key});
 
   @override
-  ConsumerState<CreateSponsorshipPage> createState() => _CreateSponsorshipPageState();
+  ConsumerState<CreateSponsorshipPage> createState() =>
+      _CreateSponsorshipPageState();
 }
 
 class _CreateSponsorshipPageState extends ConsumerState<CreateSponsorshipPage> {
@@ -43,20 +45,25 @@ class _CreateSponsorshipPageState extends ConsumerState<CreateSponsorshipPage> {
     }
 
     setState(() => _saving = true);
-    final result = await ref.read(sponsorshipsRepositoryProvider).createSponsorship({
-      'brand_name': _brandCtrl.text.trim(),
-      'sport_id': _sport!.id,
-      'sponsorship_type': _typeCtrl.text.trim(),
-      'requirements': _requirementsCtrl.text.trim(),
-      'benefits': _benefitsCtrl.text.trim(),
-      if (_contactCtrl.text.trim().isNotEmpty) 'contact': _contactCtrl.text.trim(),
-    });
+    final result = await ref
+        .read(sponsorshipsRepositoryProvider)
+        .createSponsorship({
+          'brand_name': _brandCtrl.text.trim(),
+          'sport_id': _sport!.id,
+          'sponsorship_type': _typeCtrl.text.trim(),
+          'requirements': _requirementsCtrl.text.trim(),
+          'benefits': _benefitsCtrl.text.trim(),
+          if (_contactCtrl.text.trim().isNotEmpty)
+            'contact': _contactCtrl.text.trim(),
+        });
 
     if (!mounted) return;
     setState(() => _saving = false);
     final ok = result.fold((_) => false, (_) => true);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? 'Patrocinio publicado' : 'No se pudo publicar')),
+      SnackBar(
+        content: Text(ok ? 'Patrocinio publicado' : 'No se pudo publicar'),
+      ),
     );
     if (ok) Navigator.pop(context);
   }
@@ -70,32 +77,53 @@ class _CreateSponsorshipPageState extends ConsumerState<CreateSponsorshipPage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F172A),
         leading: const BackButton(color: Colors.white),
-        title: const Text('Publicar patrocinio', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Publicar patrocinio',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          const Align(alignment: Alignment.centerLeft, child: DemoBadge()),
+          const SizedBox(height: 14),
           _Field(label: 'Marca patrocinadora *', controller: _brandCtrl),
           const SizedBox(height: 14),
           sportsAsync.when(
             data: (sports) => DropdownButtonFormField<Sport>(
-              value: _sport,
+              initialValue: _sport,
               dropdownColor: const Color(0xFF1E293B),
               decoration: _decoration('Deporte *'),
               style: const TextStyle(color: Colors.white),
-              items: sports.map((sport) => DropdownMenuItem(value: sport, child: Text(sport.name))).toList(),
+              items: sports
+                  .map(
+                    (sport) =>
+                        DropdownMenuItem(value: sport, child: Text(sport.name)),
+                  )
+                  .toList(),
               onChanged: (value) => setState(() => _sport = value),
             ),
             loading: () => const LinearProgressIndicator(),
-            error: (_, __) => const Text('No se pudieron cargar deportes', style: TextStyle(color: Colors.redAccent)),
+            error: (_, _) => const Text(
+              'No se pudieron cargar deportes',
+              style: TextStyle(color: Colors.redAccent),
+            ),
           ),
           const SizedBox(height: 14),
           _Field(label: 'Tipo de patrocinio *', controller: _typeCtrl),
           const SizedBox(height: 14),
-          _Field(label: 'Requisitos para aplicar *', controller: _requirementsCtrl, maxLines: 5),
+          _Field(
+            label: 'Requisitos para aplicar *',
+            controller: _requirementsCtrl,
+            maxLines: 5,
+          ),
           const SizedBox(height: 14),
-          _Field(label: 'Beneficios ofrecidos *', controller: _benefitsCtrl, maxLines: 5),
+          _Field(
+            label: 'Beneficios ofrecidos *',
+            controller: _benefitsCtrl,
+            maxLines: 5,
+          ),
           const SizedBox(height: 14),
           _Field(label: 'Contacto', controller: _contactCtrl),
           const SizedBox(height: 24),
@@ -119,7 +147,11 @@ class _Field extends StatelessWidget {
   final TextEditingController controller;
   final int maxLines;
 
-  const _Field({required this.label, required this.controller, this.maxLines = 1});
+  const _Field({
+    required this.label,
+    required this.controller,
+    this.maxLines = 1,
+  });
 
   @override
   Widget build(BuildContext context) {

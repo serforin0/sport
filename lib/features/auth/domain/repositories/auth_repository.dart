@@ -2,7 +2,11 @@ import 'package:sport/core/result/result.dart';
 import '../entities/user.dart';
 
 abstract class AuthRepository {
-  Future<Result<User>> signInWithEmailAndPassword(String email, String password);
+  Future<Result<User>> signInWithEmailAndPassword(
+    String email,
+    String password,
+  );
+  Future<Result<User>> signInAsDemoUser();
   Future<Result<User>> signUpWithEmailAndPassword({
     required String email,
     required String password,
@@ -22,7 +26,11 @@ abstract class AuthRepository {
   Future<Result<void>> signOut();
   Future<Result<User?>> getCurrentUser();
   Future<Result<String>> forgotPassword(String email);
-  Future<Result<void>> resetPassword({required String email, required String code, required String password});
+  Future<Result<void>> resetPassword({
+    required String email,
+    required String code,
+    required String password,
+  });
   Future<Result<User>> updateProfile({
     required String userId,
     String? firstName,
@@ -41,5 +49,3 @@ abstract class AuthRepository {
   });
   Future<Result<User>> getProfile(String userId);
 }
-
-

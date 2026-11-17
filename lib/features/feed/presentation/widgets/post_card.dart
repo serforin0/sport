@@ -10,7 +10,6 @@ import '../../../../core/widgets/video_background.dart';
 import '../../../../core/widgets/skeleton_base.dart';
 import '../pages/post_detail_page.dart';
 
-
 class PostCard extends ConsumerStatefulWidget {
   final Post post;
   final String currentUserId;
@@ -51,13 +50,15 @@ class PostCard extends ConsumerStatefulWidget {
           const SizedBox(height: 8),
           const SkeletonBase(width: 200, height: 12),
           const SizedBox(height: 16),
-          const SkeletonBase(width: double.infinity, height: 200, borderRadius: 12),
+          const SkeletonBase(
+            width: double.infinity,
+            height: 200,
+            borderRadius: 12,
+          ),
         ],
       ),
     );
   }
-
-
 
   @override
   ConsumerState<PostCard> createState() => _PostCardState();
@@ -130,11 +131,19 @@ class _PostCardState extends ConsumerState<PostCard>
     );
   }
 
+  void _showComingSoon() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Esta opción estará disponible próximamente'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final post = widget.post;
     return Container(
-      margin: const EdgeInsets.only(bottom: 0),
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       padding: const EdgeInsets.fromLTRB(14, 18, 14, 14),
       decoration: BoxDecoration(
         color: const Color(0xFF0F2A5B),
@@ -147,46 +156,47 @@ class _PostCardState extends ConsumerState<PostCard>
         children: [
           // Header
           Row(
-              children: [
-                Hero(
-                  tag: 'avatar_${post.id}_${post.author.id}',
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.white12,
-                    backgroundImage: post.author.photoUrl != null
-                        ? CachedNetworkImageProvider(post.author.photoUrl!)
-                        : null,
-                    child: post.author.photoUrl == null
-                        ? const Icon(Icons.person, color: Colors.white54)
-                        : null,
-                  ),
+            children: [
+              Hero(
+                tag: 'avatar_${post.id}_${post.author.id}',
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.white12,
+                  backgroundImage: post.author.photoUrl != null
+                      ? CachedNetworkImageProvider(post.author.photoUrl!)
+                      : null,
+                  child: post.author.photoUrl == null
+                      ? const Icon(Icons.person, color: Colors.white54)
+                      : null,
                 ),
+              ),
 
-
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        post.author.name ?? 'Usuario',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      post.author.name ?? 'Usuario',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
                       ),
-                      Text(
-                        _authorDetailLine(post),
-                        style: const TextStyle(color: Color(0xFF23A6E8), fontSize: 11),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      _authorDetailLine(post),
+                      style: const TextStyle(
+                        color: Color(0xFF23A6E8),
+                        fontSize: 11,
                       ),
-                    ],
-                  ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                const Icon(Icons.close, color: Colors.white54),
-              ],
+              ),
+            ],
           ),
           const SizedBox(height: 12),
 
@@ -195,20 +205,33 @@ class _PostCardState extends ConsumerState<PostCard>
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF3B82F6).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF3B82F6).withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.emoji_events_outlined, color: Color(0xFF60A5FA), size: 12),
+                    const Icon(
+                      Icons.emoji_events_outlined,
+                      color: Color(0xFF60A5FA),
+                      size: 12,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       post.eventName!,
-                      style: const TextStyle(color: Color(0xFF60A5FA), fontSize: 11, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        color: Color(0xFF60A5FA),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
@@ -222,7 +245,11 @@ class _PostCardState extends ConsumerState<PostCard>
               padding: EdgeInsets.zero,
               child: Text(
                 post.description,
-                style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.35),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  height: 1.35,
+                ),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -235,10 +262,12 @@ class _PostCardState extends ConsumerState<PostCard>
               onTap: _navigateToDetail,
               child: Padding(
                 padding: const EdgeInsets.only(top: 10),
-                child: Hero(tag: 'post_media_${post.id}', child: _PostMediaGrid(images: post.images)),
+                child: Hero(
+                  tag: 'post_media_${post.id}',
+                  child: _PostMediaGrid(images: post.images),
+                ),
               ),
             )
-
           else if (post.videoUrl != null)
             Padding(
               padding: const EdgeInsets.only(top: 10),
@@ -260,19 +289,25 @@ class _PostCardState extends ConsumerState<PostCard>
                   children: [
                     Text(
                       _formatTime(post.createdAt),
-                      style: const TextStyle(color: Colors.white54, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
                     ),
                     const Spacer(),
                     Text(
                       '${post.comments.length} Comentarios',
-                      style: const TextStyle(color: Colors.white54, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
                 if (post.likeCount > 0) ...[
                   const SizedBox(height: 10),
                   Text(
-                    'Le ha gustado a ${post.likes.first} y otros ${post.likeCount - 1} usuarios',
+                    post.likeSummary,
                     style: const TextStyle(color: Colors.white60, fontSize: 12),
                   ),
                 ],
@@ -290,15 +325,21 @@ class _PostCardState extends ConsumerState<PostCard>
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                _isLiked ? Icons.thumb_up_alt : Icons.thumb_up_alt_outlined,
-                                color: _isLiked ? const Color(0xFFFFB547) : Colors.white70,
+                                _isLiked
+                                    ? Icons.thumb_up_alt
+                                    : Icons.thumb_up_alt_outlined,
+                                color: _isLiked
+                                    ? const Color(0xFFFFB547)
+                                    : Colors.white70,
                                 size: 18,
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 'Me gusta',
                                 style: TextStyle(
-                                  color: _isLiked ? const Color(0xFFFFB547) : Colors.white70,
+                                  color: _isLiked
+                                      ? const Color(0xFFFFB547)
+                                      : Colors.white70,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -314,20 +355,37 @@ class _PostCardState extends ConsumerState<PostCard>
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.chat_bubble_outline, color: Colors.white70, size: 16),
+                          Icon(
+                            Icons.chat_bubble_outline,
+                            color: Colors.white70,
+                            size: 16,
+                          ),
                           SizedBox(width: 6),
-                          Text('Comentar', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500)),
+                          Text(
+                            'Comentar',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: _showComingSoon,
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.send, color: Colors.white70, size: 16),
                           SizedBox(width: 6),
-                          Text('Compartir', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                          Text(
+                            'Compartir',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -340,7 +398,6 @@ class _PostCardState extends ConsumerState<PostCard>
       ),
     );
   }
-
 }
 
 class _PostMediaGrid extends StatelessWidget {
@@ -406,7 +463,8 @@ class _PostImage extends StatelessWidget {
         width: double.infinity,
         height: height,
         fit: BoxFit.cover,
-        placeholder: (context, url) => SkeletonBase(height: height, borderRadius: 3),
+        placeholder: (context, url) =>
+            SkeletonBase(height: height, borderRadius: 3),
         errorWidget: (context, url, error) => const _PostImageError(),
       ),
     );
@@ -421,9 +479,9 @@ class _PostImageError extends StatelessWidget {
     return Container(
       height: 180,
       color: Colors.white10,
-      child: const Center(child: Icon(Icons.image_outlined, color: Colors.white24)),
+      child: const Center(
+        child: Icon(Icons.image_outlined, color: Colors.white24),
+      ),
     );
   }
 }
-
-

@@ -32,10 +32,23 @@ class EventDetailPage extends ConsumerWidget {
                   height: 220,
                   width: double.infinity,
                   child: event.photoUrl?.isNotEmpty == true
-                      ? CachedNetworkImage(imageUrl: event.photoUrl!, fit: BoxFit.cover)
-                      : Container(
-                          color: const Color(0xFF1E293B),
-                          child: const Icon(Icons.event, color: Colors.white24, size: 72),
+                      ? CachedNetworkImage(
+                          imageUrl: event.photoUrl!,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, _, _) => Semantics(
+                            label: 'Foto de evento no disponible',
+                            child: Container(
+                              color: const Color(0xFF1E293B),
+                              child: const Icon(Icons.event, color: Colors.white24, size: 72),
+                            ),
+                          ),
+                        )
+                      : Semantics(
+                          label: 'Foto de evento no disponible',
+                          child: Container(
+                            color: const Color(0xFF1E293B),
+                            child: const Icon(Icons.event, color: Colors.white24, size: 72),
+                          ),
                         ),
                 ),
                 Padding(

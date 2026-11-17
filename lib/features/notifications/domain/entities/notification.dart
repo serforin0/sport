@@ -17,6 +17,7 @@ class AppNotification {
   final DateTime createdAt;
   final bool isRead;
   final String? relatedId; // ID of the post, event, etc.
+  final String? body;
 
   const AppNotification({
     required this.id,
@@ -28,9 +29,13 @@ class AppNotification {
     required this.createdAt,
     this.isRead = false,
     this.relatedId,
+    this.body,
   });
 
   String get message {
+    if (body != null && body!.trim().isNotEmpty) {
+      return body!.trim();
+    }
     switch (type) {
       case NotificationType.comment:
         return 'ha comentado tu publicación.';
@@ -58,6 +63,7 @@ class AppNotification {
       createdAt: createdAt,
       isRead: isRead ?? this.isRead,
       relatedId: relatedId,
+      body: body,
     );
   }
 }

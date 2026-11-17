@@ -1,8 +1,8 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:sport/core/network/api_client.dart';
 import 'package:sport/core/network/json_api_utils.dart';
 import 'package:sport/features/connections/domain/entities/connected_contact.dart';
-import 'package:sport/features/people/domain/people_list_user.dart';
 import '../../domain/entities/pending_connection.dart';
 
 class ConnectionConflictException implements Exception {
@@ -18,25 +18,16 @@ class ConnectionsRemoteDataSource {
   Options _auth(String token) => Options(headers: {'Authorization': 'Bearer $token'});
 
   /// Amigos / conexiones aceptadas.
-  Future<List<ConnectedContact>> fetchAcceptedConnections(String token) async {
+  Future<List<ConnectedContact>> fetchAcceptedConnections(
+    String token, {
+    String? viewerId,
+  }) async {
     final response = await apiClient.get('/connections', options: _auth(token));
     final list = unwrapDataList(response.data);
-    return list.whereType<Map>().map((e) => _parseAccepted(Map<String, dynamic>.from(e))).toList();
-  }
-
-  ConnectedContact _parseAccepted(Map<String, dynamic> json) {
-    final connectionId = json['id']?.toString() ?? '';
-    final userRaw = json['user'] ?? json['connected_user'] ?? json['friend'];
-    Map<String, dynamic> userMap;
-    if (userRaw is Map) {
-      userMap = Map<String, dynamic>.from(userRaw);
-    } else {
-      userMap = Map<String, dynamic>.from(json);
-    }
-    return ConnectedContact(
-      connectionId: connectionId,
-      person: PeopleListUser.fromApiMap(userMap),
-    );
+    return list
+        .whereType<Map>()
+        .map((e) => ConnectedContact.fromApi(Map<String, dynamic>.from(e), viewerId: viewerId))
+        .toList();
   }
 
   Future<List<PendingConnection>> fetchIncoming(String token) async {

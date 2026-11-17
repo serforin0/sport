@@ -17,12 +17,15 @@ class PeopleListUser {
         prof?['role']?.toString() ??
         m['role']?.toString() ??
         'Deportista';
-    final sport = prof?['sport']?.toString() ?? m['sport']?.toString() ?? '';
-    final country = prof?['country']?.toString() ??
-        m['country']?.toString() ??
-        prof?['location']?.toString() ??
-        '';
-    final parts = [role, sport, country].where((s) => s.trim().isNotEmpty).toList();
+    String labelOf(dynamic v) {
+      if (v is Map) return v['name']?.toString() ?? '';
+      return v?.toString() ?? '';
+    }
+    final sport = labelOf(prof?['sport'] ?? m['sport']);
+    final country = labelOf(prof?['country'] ?? m['country']) ;
+    final location = prof?['location']?.toString() ?? '';
+    final countryOrLocation = country.isNotEmpty ? country : location;
+    final parts = [role, sport, countryOrLocation].where((s) => s.trim().isNotEmpty).toList();
     return parts.join(' · ');
   }
 

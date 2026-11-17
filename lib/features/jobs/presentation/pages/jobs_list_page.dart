@@ -4,7 +4,6 @@ import 'job_detail_page.dart';
 import '../widgets/job_card_widget.dart';
 import '../providers/jobs_providers.dart';
 import 'create_job_flow_page.dart';
-import 'job_filters_page.dart';
 import 'my_jobs_page.dart';
 import 'saved_jobs_page.dart';
 
@@ -28,7 +27,9 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) => SafeArea(
         top: false,
         child: Padding(
@@ -40,7 +41,10 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
                 child: Container(
                   width: 72,
                   height: 6,
-                  decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(10)),
+                  decoration: BoxDecoration(
+                    color: Colors.black26,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
               const SizedBox(height: 14),
@@ -49,7 +53,12 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
                 label: 'Publicar empleo',
                 onTap: () async {
                   Navigator.pop(context);
-                  final created = await Navigator.push<bool>(context, MaterialPageRoute(builder: (_) => const CreateJobFlowPage()));
+                  final created = await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const CreateJobFlowPage(),
+                    ),
+                  );
                   if (created == true) {
                     ref.invalidate(jobsListProvider);
                   }
@@ -60,7 +69,10 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
                 label: 'Mis empleos',
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const MyJobsPage()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MyJobsPage()),
+                  );
                 },
               ),
               _JobsMenuItem(
@@ -68,7 +80,10 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
                 label: 'Empleos guardados',
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const SavedJobsPage()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SavedJobsPage()),
+                  );
                 },
               ),
             ],
@@ -89,6 +104,14 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
     }).toList();
   }
 
+  void _showFiltersComingSoon() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Los filtros avanzados estarán disponibles próximamente'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final jobsAsync = ref.watch(jobsListProvider);
@@ -99,7 +122,14 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
         toolbarHeight: 86,
         backgroundColor: const Color(0xFF0F2A5B),
         elevation: 0,
-        title: const Text('Empleos', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900)),
+        title: const Text(
+          'Empleos',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
         centerTitle: true,
         actions: [
           IconButton(
@@ -124,8 +154,15 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Buscar empleos por deporte, cargo o empresa',
-                hintStyle: const TextStyle(color: Color(0xFF9AB0CC), fontSize: 13),
-                prefixIcon: const Icon(Icons.search, color: Colors.white, size: 26),
+                hintStyle: const TextStyle(
+                  color: Color(0xFF9AB0CC),
+                  fontSize: 13,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: Colors.white,
+                  size: 26,
+                ),
                 suffixIcon: _searchCtrl.text.isEmpty
                     ? null
                     : IconButton(
@@ -144,11 +181,12 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
                 if (filtered.isEmpty) {
                   return _JobsEmptyState(
                     showResultsHeader: _searchCtrl.text.trim().isNotEmpty,
-                    onFilters: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const JobFiltersPage())),
+                    onFilters: _showFiltersComingSoon,
                   );
                 }
                 return RefreshIndicator(
-                  onRefresh: () => ref.read(jobsListProvider.notifier).refresh(),
+                  onRefresh: () =>
+                      ref.read(jobsListProvider.notifier).refresh(),
                   child: ListView(
                     padding: const EdgeInsets.only(bottom: 88),
                     children: [
@@ -161,14 +199,20 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
                                 _searchCtrl.text.trim().isEmpty
                                     ? 'Principales recomendaciones para ti'
                                     : '${filtered.length} Resultados',
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 14),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
-                            if (_searchCtrl.text.trim().isNotEmpty)
-                              IconButton(
-                                icon: const Icon(Icons.tune, color: Color(0xFFFF9441)),
-                                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const JobFiltersPage())),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.tune,
+                                color: Color(0xFFFF9441),
                               ),
+                              onPressed: _showFiltersComingSoon,
+                            ),
                           ],
                         ),
                       ),
@@ -177,7 +221,9 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
                           job: job,
                           onTap: () => Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => JobDetailPage(job: job)),
+                            MaterialPageRoute(
+                              builder: (_) => JobDetailPage(job: job),
+                            ),
                           ),
                         ),
                     ],
@@ -194,9 +240,13 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('Error al cargar empleos', style: TextStyle(color: Colors.white70)),
+                    const Text(
+                      'Error al cargar empleos',
+                      style: TextStyle(color: Colors.white70),
+                    ),
                     TextButton(
-                      onPressed: () => ref.read(jobsListProvider.notifier).refresh(),
+                      onPressed: () =>
+                          ref.read(jobsListProvider.notifier).refresh(),
                       child: const Text('Reintentar'),
                     ),
                   ],
@@ -215,14 +265,21 @@ class _JobsMenuItem extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _JobsMenuItem({required this.icon, required this.label, required this.onTap});
+  const _JobsMenuItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       onTap: onTap,
       leading: Icon(icon, color: const Color(0xFF2D2D2D)),
-      title: Text(label, style: const TextStyle(color: Color(0xFF2D2D2D), fontSize: 16)),
+      title: Text(
+        label,
+        style: const TextStyle(color: Color(0xFF2D2D2D), fontSize: 16),
+      ),
     );
   }
 }
@@ -231,7 +288,10 @@ class _JobsEmptyState extends StatelessWidget {
   final bool showResultsHeader;
   final VoidCallback onFilters;
 
-  const _JobsEmptyState({required this.showResultsHeader, required this.onFilters});
+  const _JobsEmptyState({
+    required this.showResultsHeader,
+    required this.onFilters,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -245,9 +305,19 @@ class _JobsEmptyState extends StatelessWidget {
             child: Row(
               children: [
                 const Expanded(
-                  child: Text('0 Resultados', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900)),
+                  child: Text(
+                    '0 Resultados',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                 ),
-                IconButton(icon: const Icon(Icons.tune, color: Color(0xFFFF9441)), onPressed: onFilters),
+                IconButton(
+                  icon: const Icon(Icons.tune, color: Color(0xFFFF9441)),
+                  onPressed: onFilters,
+                ),
               ],
             ),
           ),
@@ -257,7 +327,10 @@ class _JobsEmptyState extends StatelessWidget {
             children: [
               Icon(Icons.manage_search, color: Color(0xFF9BB1CB), size: 138),
               SizedBox(height: 18),
-              Text('Sin resultados', style: TextStyle(color: Colors.white, fontSize: 16)),
+              Text(
+                'Sin resultados',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
             ],
           ),
         ),

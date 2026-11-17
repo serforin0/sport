@@ -32,10 +32,39 @@ class ChatRepositoryImpl implements ChatRepository {
 
   Options _auth() => Options(headers: {'Authorization': 'Bearer ${_token!}'});
 
+  Map<String, dynamic>? _contactMap(Map<String, dynamic> m) {
+    final direct = m['other_user'] ?? m['contact'] ?? m['participant'];
+    if (direct is Map) return Map<String, dynamic>.from(direct);
+    final users = m['users'];
+    if (users is List) {
+      for (final u in users) {
+        if (u is! Map) continue;
+        final map = Map<String, dynamic>.from(u);
+        if (map['id']?.toString() != _myUserId) return map;
+      }
+      if (users.isNotEmpty && users.first is Map) {
+        return Map<String, dynamic>.from(users.first as Map);
+      }
+    }
+    final user = m['user'];
+    if (user is Map) return Map<String, dynamic>.from(user);
+    return null;
+  }
+
+  String _nestedAvatar(Map<String, dynamic> map) {
+    final avatar = map['avatar'];
+    if (avatar is Map) {
+      return avatar['url']?.toString() ?? '';
+    }
+    return map['avatar']?.toString() ??
+        map['avatar_url']?.toString() ??
+        map['photo_url']?.toString() ??
+        '';
+  }
+
   String _contactName(Map<String, dynamic> m) {
-    final u = m['other_user'] ?? m['contact'] ?? m['user'] ?? m['participant'];
-    if (u is Map) {
-      final map = Map<String, dynamic>.from(u);
+    final map = _contactMap(m);
+    if (map != null) {
       final n = map['name']?.toString();
       if (n != null && n.isNotEmpty) return n;
       final fn = map['first_name']?.toString() ?? '';
@@ -47,32 +76,22 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   String _contactAvatar(Map<String, dynamic> m) {
-    final u = m['other_user'] ?? m['contact'] ?? m['user'] ?? m['participant'];
-    if (u is Map) {
-      final map = Map<String, dynamic>.from(u);
-      return map['avatar']?.toString() ??
-          map['avatar_url']?.toString() ??
-          map['photo_url']?.toString() ??
-          '';
-    }
-    return '';
+    final map = _contactMap(m);
+    if (map == null) return '';
+    return _nestedAvatar(map);
   }
 
   String? _contactUserId(Map<String, dynamic> m) {
-    final u = m['other_user'] ?? m['contact'] ?? m['user'] ?? m['participant'];
-    if (u is Map) {
-      final id = Map<String, dynamic>.from(u)['id']?.toString();
-      if (id != null && id.isNotEmpty) return id;
-    }
+    final map = _contactMap(m);
+    final id = map?['id']?.toString();
+    if (id != null && id.isNotEmpty) return id;
     return null;
   }
 
   String _contactSubtitle(Map<String, dynamic> m) {
-    final u = m['other_user'] ?? m['contact'] ?? m['user'] ?? m['participant'];
-    if (u is Map) {
-      return PeopleListUser.formatDetailLine(Map<String, dynamic>.from(u));
-    }
-    return '';
+    final map = _contactMap(m);
+    if (map == null) return '';
+    return PeopleListUser.formatDetailLine(map);
   }
 
   ChatConversation _conversationFromMap(Map<String, dynamic> m) {
@@ -82,7 +101,11 @@ class ChatRepositoryImpl implements ChatRepository {
       contactAvatar: _contactAvatar(m),
       lastMessage: _lastMessageText(m),
       lastMessageTime: _lastMessageTime(m),
-      unreadCount: int.tryParse((m['unread_count'] ?? m['unreadCount'] ?? 0).toString()) ?? 0,
+      unreadCount:
+          int.tryParse(
+            (m['unread_count'] ?? m['unreadCount'] ?? 0).toString(),
+          ) ??
+          0,
       isOnline: m['is_online'] == true || m['online'] == true,
       contactUserId: _contactUserId(m),
       contactSubtitle: _contactSubtitle(m),
@@ -117,7 +140,10 @@ class ChatRepositoryImpl implements ChatRepository {
     try {
       final response = await apiClient.get('/chat', options: _auth());
       final list = unwrapDataList(response.data);
-      return list.whereType<Map>().map((e) => _conversationFromMap(Map<String, dynamic>.from(e))).toList();
+      return list
+          .whereType<Map>()
+          .map((e) => _conversationFromMap(Map<String, dynamic>.from(e)))
+          .toList();
     } catch (_) {
       return [];
     }
@@ -126,12 +152,18 @@ class ChatRepositoryImpl implements ChatRepository {
   List<Map<String, dynamic>> _messagesFromResponse(dynamic body) {
     final direct = unwrapDataList(body);
     if (direct.isNotEmpty) {
-      return direct.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+      return direct
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
     }
     if (body is Map) {
       final data = body['data'];
       if (data is Map && data['messages'] is List) {
-        return (data['messages'] as List).whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+        return (data['messages'] as List)
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
       }
     }
     return [];
@@ -141,15 +173,20 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<List<ChatMessage>> getMessages(String conversationId) async {
     if (_token == null) return [];
     try {
-      final response = await apiClient.get('/chat/$conversationId', options: _auth());
+      final response = await apiClient.get(
+        '/chat/$conversationId',
+        options: _auth(),
+      );
       final myId = _myUserId;
       return _messagesFromResponse(response.data).map((json) {
-        final senderRaw = json['user_id'] ?? json['sender_id'] ?? json['from_id'];
+        final senderRaw =
+            json['user_id'] ?? json['sender_id'] ?? json['from_id'];
         final senderId = senderRaw?.toString() ?? '';
         final isMe = myId.isNotEmpty && senderId == myId;
         return ChatMessage(
           id: json['id']?.toString() ?? '',
-          text: (json['content'] ?? json['body'] ?? json['text'] ?? '').toString(),
+          text: (json['content'] ?? json['body'] ?? json['text'] ?? '')
+              .toString(),
           senderId: isMe ? 'me' : senderId,
           timestamp: _parseTs(json['created_at'] ?? json['sent_at']),
           isRead: json['read_at'] != null || json['is_read'] == true,
@@ -176,11 +213,14 @@ class ChatRepositoryImpl implements ChatRepository {
     }
     final response = await apiClient.post(
       '/chat/$conversationId/messages',
-      data: {'content': text},
+      data: {'text': text},
       options: _auth(),
     );
-    final map = unwrapDataMap(response.data) ??
-        (response.data is Map ? Map<String, dynamic>.from(response.data as Map) : null);
+    final map =
+        unwrapDataMap(response.data) ??
+        (response.data is Map
+            ? Map<String, dynamic>.from(response.data as Map)
+            : null);
     if (map == null) {
       return ChatMessage(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -191,7 +231,7 @@ class ChatRepositoryImpl implements ChatRepository {
     }
     return ChatMessage(
       id: map['id']?.toString() ?? '',
-      text: (map['content'] ?? map['body'] ?? text).toString(),
+      text: (map['text'] ?? map['content'] ?? map['body'] ?? text).toString(),
       senderId: 'me',
       timestamp: _parseTs(map['created_at'] ?? map['sent_at']),
     );
@@ -213,11 +253,15 @@ class ChatRepositoryImpl implements ChatRepository {
     String subtitleFallback,
   ) {
     final conv = _conversationFromMap(m);
-    final subtitle = subtitleFallback.isNotEmpty ? subtitleFallback : conv.contactSubtitle;
+    final subtitle = subtitleFallback.isNotEmpty
+        ? subtitleFallback
+        : conv.contactSubtitle;
     return ChatConversation(
       id: conv.id.isNotEmpty ? conv.id : (m['id']?.toString() ?? ''),
       contactName: contactName,
-      contactAvatar: contactAvatar.isNotEmpty ? contactAvatar : conv.contactAvatar,
+      contactAvatar: contactAvatar.isNotEmpty
+          ? contactAvatar
+          : conv.contactAvatar,
       lastMessage: conv.lastMessage,
       lastMessageTime: conv.lastMessageTime,
       unreadCount: conv.unreadCount,
@@ -234,12 +278,22 @@ class ChatRepositoryImpl implements ChatRepository {
     String contactSubtitle,
     Map<String, dynamic> body,
   ) async {
-    final response = await apiClient.post('/chat', data: body, options: _auth());
+    final response = await apiClient.post(
+      '/chat',
+      data: body,
+      options: _auth(),
+    );
     final m = _unwrapConversationBody(response.data);
     if (m == null) {
       throw StateError('Respuesta de chat inválida');
     }
-    return _directChatForUser(m, otherUserId, contactName, contactAvatar, contactSubtitle);
+    return _directChatForUser(
+      m,
+      otherUserId,
+      contactName,
+      contactAvatar,
+      contactSubtitle,
+    );
   }
 
   @override

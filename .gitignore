@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local build / analysis dumps (do not commit)
+/artifacts/
+*_analysis*.txt
+analysis_output.txt
+build_output.txt
+final_check.txt
+current_analysis.txt

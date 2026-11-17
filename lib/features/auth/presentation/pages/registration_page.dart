@@ -131,7 +131,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
       };
       
       await ref.read(authControllerProvider.notifier).signUp(
-            email: _emailCtrl.text.trim(),
+            email: _emailCtrl.text.trim().toLowerCase(),
             password: _passCtrl.text,
             name: '${_firstNameCtrl.text.trim()} ${_lastNameCtrl.text.trim()}',
             countryId: _selectedCountry!.id,
@@ -565,11 +565,22 @@ class _StepInterests extends ConsumerWidget {
                   label: Text(sport.name),
                   selected: isSelected,
                   onSelected: (_) => onToggle(sport.id),
-                  backgroundColor: Colors.white.withValues(alpha: 0.05),
-                  selectedColor: const Color(0xFF2563EB),
+                  color: WidgetStateProperty.resolveWith<Color>((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return const Color(0xFF2563EB);
+                    }
+                    return const Color(0xFF1E293B);
+                  }),
                   checkmarkColor: Colors.white,
-                  labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.white70),
-                  shape: StadiumBorder(side: BorderSide(color: isSelected ? const Color(0xFF3B82F6) : Colors.white10)),
+                  labelStyle: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  shape: StadiumBorder(
+                    side: BorderSide(
+                      color: isSelected ? const Color(0xFF60A5FA) : const Color(0xFF334155),
+                    ),
+                  ),
                 );
               }).toList(),
             ),

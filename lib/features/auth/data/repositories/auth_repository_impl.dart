@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sport/core/errors/failures.dart';
@@ -17,12 +18,15 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this.sharedPreferences, this.apiClient);
 
   @override
-  Future<Result<User>> signInWithEmailAndPassword(String email, String password) async {
+  Future<Result<User>> signInWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
     try {
-      final response = await apiClient.post('/auth/login', data: {
-        'email': email,
-        'password': password,
-      });
+      final response = await apiClient.post(
+        '/auth/login',
+        data: {'email': email, 'password': password},
+      );
 
       final body = response.data;
       if (body is! Map) {
@@ -35,12 +39,37 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       final user = UserModel.fromMap(Map<String, dynamic>.from(userRaw));
-      await _cacheUser(user);
-      await sharedPreferences.setString(_tokenKey, token.toString());
+      await _cacheSession(user, token.toString());
 
       return Ok(user);
     } catch (e) {
       return Err(ValidationFailure('Error al iniciar sesión: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Result<User>> signInAsDemoUser() async {
+    try {
+      final response = await apiClient.post('/auth/demo-login');
+      final body = response.data;
+      if (body is! Map) {
+        return Err(ValidationFailure('Respuesta de acceso demo inválida'));
+      }
+      final userRaw = body['data'];
+      final token = body['token'];
+      if (userRaw is! Map || token == null || token.toString().isEmpty) {
+        return Err(ValidationFailure('Respuesta de acceso demo inválida'));
+      }
+
+      final user = UserModel.fromMap(Map<String, dynamic>.from(userRaw));
+      await _cacheSession(user, token.toString());
+      return Ok(user);
+    } on Exception {
+      return Err(
+        ValidationFailure(
+          'No se pudo iniciar la demostración. Inténtalo de nuevo.',
+        ),
+      );
     }
   }
 
@@ -62,6 +91,12 @@ class AuthRepositoryImpl implements AuthRepository {
     String? avatarPath,
   }) async {
     try {
+      final validAvatarPath =
+          avatarPath != null &&
+              avatarPath.isNotEmpty &&
+              await File(avatarPath).exists()
+          ? avatarPath
+          : null;
       final trimmed = name.trim();
       final parts = trimmed.split(RegExp(r'\s+'));
       final firstName = parts.isNotEmpty ? parts.first : trimmed;
@@ -76,9 +111,12 @@ class AuthRepositoryImpl implements AuthRepository {
         if (phone != null && phone.isNotEmpty) 'phone_number': phone,
         if (birthDate != null && birthDate.isNotEmpty) 'birth_date': birthDate,
         if (position != null && position.isNotEmpty) 'position': position,
-        if (sportLevel != null && sportLevel.isNotEmpty) 'sport_level': sportLevel,
-        if (currentTeam != null && currentTeam.isNotEmpty) 'current_team': currentTeam,
-        if (socialLinks != null && socialLinks.isNotEmpty) 'social_links': socialLinks,
+        if (sportLevel != null && sportLevel.isNotEmpty)
+          'sport_level': sportLevel,
+        if (currentTeam != null && currentTeam.isNotEmpty)
+          'current_team': currentTeam,
+        if (socialLinks != null && socialLinks.isNotEmpty)
+          'social_links': socialLinks,
       };
 
       dynamic data = {
@@ -89,17 +127,19 @@ class AuthRepositoryImpl implements AuthRepository {
         'profile': profile,
       };
 
-      if (avatarPath != null && avatarPath.isNotEmpty) {
+      if (validAvatarPath != null) {
         data = FormData.fromMap({
           'email': email,
           'password': password,
           'password_confirmation': password,
           'name': trimmed,
           for (final entry in profile.entries)
-            if (entry.key != 'social_links') 'profile[${entry.key}]': entry.value,
+            if (entry.key != 'social_links')
+              'profile[${entry.key}]': entry.value,
           if (socialLinks != null)
-            for (final entry in socialLinks.entries) 'profile[social_links][${entry.key}]': entry.value,
-          'avatar': await MultipartFile.fromFile(avatarPath),
+            for (final entry in socialLinks.entries)
+              'profile[social_links][${entry.key}]': entry.value,
+          'avatar': await MultipartFile.fromFile(validAvatarPath),
         });
       }
 
@@ -116,8 +156,7 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       final user = UserModel.fromMap(Map<String, dynamic>.from(userRaw));
-      await _cacheUser(user);
-      await sharedPreferences.setString(_tokenKey, token.toString());
+      await _cacheSession(user, token.toString());
 
       return Ok(user);
     } catch (e) {
@@ -146,16 +185,44 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Result<User?>> getCurrentUser() async {
     final userStr = sharedPreferences.getString(_userKey);
-    if (userStr != null) {
-      return Ok(UserModel.fromMap(json.decode(userStr) as Map<String, dynamic>));
+    final token = sharedPreferences.getString(_tokenKey);
+
+    if (userStr == null || token == null || token.isEmpty) {
+      await sharedPreferences.remove(_userKey);
+      await sharedPreferences.remove(_tokenKey);
+      return const Ok(null);
     }
-    return const Ok(null);
+
+    try {
+      final response = await apiClient.get(
+        '/user/me',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      final body = response.data;
+      final userRaw = body is Map ? body['data'] : null;
+      if (userRaw is Map) {
+        final user = UserModel.fromMap(Map<String, dynamic>.from(userRaw));
+        await _cacheUser(user);
+        return Ok(user);
+      }
+    } catch (e) {
+      if (e.toString().contains('401')) {
+        await sharedPreferences.remove(_userKey);
+        await sharedPreferences.remove(_tokenKey);
+        return const Ok(null);
+      }
+    }
+
+    return Ok(UserModel.fromMap(json.decode(userStr) as Map<String, dynamic>));
   }
 
   @override
   Future<Result<String>> forgotPassword(String email) async {
     try {
-      final response = await apiClient.post('/auth/forgot-password', data: {'email': email});
+      final response = await apiClient.post(
+        '/auth/forgot-password',
+        data: {'email': email},
+      );
       final message = response.data['message'] ?? 'Código enviado';
       return Ok(message);
     } catch (e) {
@@ -170,18 +237,20 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      await apiClient.post('/auth/reset-password', data: {
-        'email': email,
-        'code': code,
-        'password': password,
-        'password_confirmation': password,
-      });
+      await apiClient.post(
+        '/auth/reset-password',
+        data: {
+          'email': email,
+          'code': code,
+          'password': password,
+          'password_confirmation': password,
+        },
+      );
       return Ok(null);
     } catch (e) {
       return Err(ServerFailure(e.toString()));
     }
   }
-
 
   @override
   Future<Result<User>> getProfile(String userId) async {
@@ -195,7 +264,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-
   Future<Result<User>> updateProfile({
     required String userId,
     String? firstName,
@@ -228,9 +296,10 @@ class AuthRepositoryImpl implements AuthRepository {
       if (socialLinks != null) profileData['social_links'] = socialLinks;
       if (bio != null) profileData['bio'] = bio;
 
-      final response = await apiClient.put('/user/$userId', data: {
-        'profile': profileData,
-      });
+      final response = await apiClient.put(
+        '/user/$userId',
+        data: {'profile': profileData},
+      );
 
       final user = UserModel.fromMap(response.data['data']);
       await _cacheUser(user);
@@ -243,5 +312,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> _cacheUser(UserModel user) async {
     await sharedPreferences.setString(_userKey, json.encode(user.toMap()));
   }
-}
 
+  Future<void> _cacheSession(UserModel user, String token) async {
+    await _cacheUser(user);
+    await sharedPreferences.setString(_tokenKey, token);
+  }
+}

@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sport/core/providers/shared_preferences_provider.dart';
 import 'package:sport/features/auth/presentation/pages/auth_landing_page.dart';
 
+class _MockSharedPreferences extends Mock implements SharedPreferences {}
+
 Widget _wrap(Widget child) {
-  return MaterialApp(
-    home: MediaQuery(
-      // ✅ en tests a veces el alto queda pequeño, le damos un size estable
-      data: const MediaQueryData(size: Size(390, 844)),
-      child: child,
+  final preferences = _MockSharedPreferences();
+  when(() => preferences.getString(any())).thenReturn(null);
+  when(() => preferences.remove(any())).thenAnswer((_) async => true);
+  return ProviderScope(
+    overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
+    child: MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(size: Size(390, 844)),
+        child: child,
+      ),
     ),
   );
 }
@@ -22,11 +33,11 @@ void main() {
       ),
     );
 
-    expect(find.text('Registrarme con correo'), findsOneWidget);
+    expect(find.text('REGISTRARSE'), findsOneWidget);
     expect(find.text('Correo electrónico'), findsNothing);
   });
 
-  testWidgets('Cambia a login al tocar Inicia sesión ahora', (tester) async {
+  testWidgets('Cambia a login al tocar ENTRAR', (tester) async {
     await tester.pumpWidget(
       _wrap(
         const AuthPage(
@@ -35,7 +46,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Inicia sesión ahora'));
+    await tester.tap(find.text('ENTRAR'));
     await tester.pumpAndSettle();
 
     expect(find.text('Correo electrónico'), findsOneWidget);
@@ -49,14 +60,15 @@ void main() {
       _wrap(
         const AuthPage(
           background: ColoredBox(color: Colors.black), // ✅ evita video
+          enableDemoLogin: false,
         ),
       ),
     );
 
-    // ✅ En landing NO debe estar el botón principal
     expect(find.widgetWithText(ElevatedButton, 'Iniciar sesión'), findsNothing);
+    expect(find.text('USUARIO DE PRUEBA'), findsNothing);
 
-    await tester.tap(find.text('Inicia sesión ahora'));
+    await tester.tap(find.text('ENTRAR'));
     await tester.pumpAndSettle();
 
     // ✅ En login sí debe estar
@@ -75,7 +87,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Inicia sesión ahora'));
+    await tester.tap(find.text('ENTRAR'));
     await tester.pumpAndSettle();
 
     // ✅ Inicialmente obscure=true => icono visibility_off
@@ -106,6 +118,21 @@ void main() {
       find.widgetWithText(ElevatedButton, 'Iniciar sesión'),
       findsOneWidget,
     );
-    expect(find.text('Registrarme con correo'), findsNothing);
+    expect(find.text('REGISTRARSE'), findsNothing);
+  });
+
+  testWidgets('muestra acceso demo únicamente con feature gate activo', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const AuthPage(
+          enableDemoLogin: true,
+          background: ColoredBox(color: Colors.black),
+        ),
+      ),
+    );
+
+    expect(find.text('USUARIO DE PRUEBA'), findsOneWidget);
   });
 }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sport/core/network/api_client.dart';
 import 'package:sport/core/providers/shared_preferences_provider.dart';
@@ -14,7 +15,17 @@ final acceptedConnectionsProvider = FutureProvider<List<ConnectedContact>>((ref)
   final prefs = ref.watch(sharedPreferencesProvider);
   final token = prefs.getString('auth_token');
   if (token == null) return [];
-  return ref.watch(connectionsRemoteDataSourceProvider).fetchAcceptedConnections(token);
+  final rawUser = prefs.getString('cached_user');
+  String? viewerId;
+  if (rawUser != null) {
+    try {
+      viewerId = (json.decode(rawUser) as Map<String, dynamic>)['id']?.toString();
+    } catch (_) {}
+  }
+  return ref.watch(connectionsRemoteDataSourceProvider).fetchAcceptedConnections(
+        token,
+        viewerId: viewerId,
+      );
 });
 
 final acceptedConnectionsCountProvider = Provider<int>((ref) {

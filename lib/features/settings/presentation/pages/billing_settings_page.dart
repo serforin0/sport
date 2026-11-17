@@ -1,17 +1,16 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sport/features/support/presentation/providers/support_providers.dart';
+import 'package:sport/features/demo/presentation/providers/demo_showcase_providers.dart';
+import 'package:sport/features/demo/presentation/widgets/demo_badge.dart';
 import 'invoices_page.dart';
 import 'payment_methods_page.dart';
-import 'add_card_page.dart';
 
 class BillingSettingsPage extends ConsumerWidget {
   const BillingSettingsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final summaryAsync = ref.watch(billingSummaryProvider);
+    final summaryAsync = ref.watch(demoShowcaseProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
@@ -35,71 +34,78 @@ class BillingSettingsPage extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white70),
-            onPressed: () => ref.invalidate(billingSummaryProvider),
+            onPressed: () => ref.invalidate(demoShowcaseProvider),
           ),
         ],
       ),
       body: summaryAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF3B82F6))),
-        error: (e, _) => Center(
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: Color(0xFF3B82F6)),
+        ),
+        error: (_, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text(
-              'No se pudo cargar el resumen.\n$e',
-              style: const TextStyle(color: Colors.white54),
-              textAlign: TextAlign.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'No se pudo cargar el resumen de demostración.',
+                  style: TextStyle(color: Colors.white54),
+                  textAlign: TextAlign.center,
+                ),
+                TextButton(
+                  onPressed: () => ref.invalidate(demoShowcaseProvider),
+                  child: const Text('Reintentar'),
+                ),
+              ],
             ),
           ),
         ),
-        data: (map) {
-          final isEmpty = map.isEmpty;
+        data: (showcase) {
+          final subscription = showcase.billing.subscription;
+          final paymentMethod = showcase.billing.paymentMethods.firstOrNull;
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 24, bottom: 16),
-                    child: Text(
-                      'Resumen de facturación (placeholder desde GET /billing/summary). '
-                      'La pasarela de pago se integrará próximamente.',
-                      style: TextStyle(color: Colors.white60, fontSize: 14, height: 1.4),
-                    ),
-                  )
-                else ...[
-                  const Text(
-                    'Datos del servidor',
-                    style: TextStyle(
-                      color: Color(0xFF3B82F6),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.1,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SelectableText(
-                    const JsonEncoder.withIndent('  ').convert(map),
-                    style: const TextStyle(color: Colors.white70, fontSize: 13, fontFamily: 'monospace'),
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: DemoBadge(),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Datos ficticios. Esta pantalla no realiza cargos ni guarda '
+                  'datos financieros.',
+                  style: TextStyle(color: Colors.white60),
+                ),
                 const _BillingHeader(title: 'SUSCRIPCIÓN'),
                 _BillingTile(
                   icon: Icons.star_outline,
-                  title: 'HubSport Premium',
-                  subtitle: 'Plan Activo: Profesional',
-                  onTap: () {}, // Future: Plan details
+                  title: subscription?.name ?? 'Sin suscripción demo',
+                  subtitle: subscription == null
+                      ? null
+                      : '${subscription.status} · '
+                            '${subscription.price} ${subscription.currency}',
+                  onTap: () => showDemoSimulation(
+                    context,
+                    'La gestión de suscripciones no está habilitada en la demo.',
+                  ),
                 ),
                 const SizedBox(height: 16),
                 const _BillingHeader(title: 'PAGOS'),
                 _BillingTile(
                   icon: Icons.credit_card_outlined,
                   title: 'Métodos de pago',
-                  subtitle: 'Visa terminada en 4242',
+                  subtitle: paymentMethod == null
+                      ? 'Sin métodos simulados'
+                      : '${paymentMethod.brand} terminada en '
+                            '${paymentMethod.last4}',
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const PaymentMethodsPage()),
+                    MaterialPageRoute(
+                      builder: (_) => const PaymentMethodsPage(),
+                    ),
                   ),
                 ),
                 _BillingTile(
@@ -124,7 +130,7 @@ class BillingSettingsPage extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF3B82F6).withOpacity(0.3),
+                          color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -132,7 +138,11 @@ class BillingSettingsPage extends ConsumerWidget {
                     ),
                     child: const Column(
                       children: [
-                        Icon(Icons.workspace_premium, color: Colors.white, size: 40),
+                        Icon(
+                          Icons.workspace_premium,
+                          color: Colors.white,
+                          size: 40,
+                        ),
                         SizedBox(height: 12),
                         Text(
                           'Desbloquea todo el potencial',
@@ -204,17 +214,24 @@ class _BillingTile extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, color: Colors.white, size: 20),
       ),
       title: Text(
         title,
-        style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+        ),
       ),
       subtitle: subtitle != null
-          ? Text(subtitle!, style: const TextStyle(color: Colors.white38, fontSize: 13))
+          ? Text(
+              subtitle!,
+              style: const TextStyle(color: Colors.white38, fontSize: 13),
+            )
           : null,
       trailing: const Icon(Icons.chevron_right, color: Colors.white24),
       onTap: onTap,

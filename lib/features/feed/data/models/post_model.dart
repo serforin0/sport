@@ -65,6 +65,7 @@ class PostModel extends Post {
     super.videoUrl,
     required super.createdAt,
     super.likes,
+    super.likeNames,
     super.comments,
     super.location,
     super.eventName,
@@ -79,6 +80,7 @@ class PostModel extends Post {
       videoUrl: _string(json['videoUrl']),
       createdAt: DateTime.parse(json['createdAt'].toString()),
       likes: List<String>.from(json['likes'] ?? []),
+      likeNames: List<String>.from(json['likeNames'] ?? []),
       comments: (json['comments'] as List? ?? [])
           .map((e) => CommentModel.fromMap(Map<String, dynamic>.from(e as Map)))
           .toList(),
@@ -97,12 +99,21 @@ class PostModel extends Post {
         _string(json['body'] ?? json['description'] ?? json['content'] ?? json['text']) ?? '';
 
     List<String> likes = [];
+    List<String> likeNames = [];
     final likesRaw = json['likes'] ?? json['liked_by'];
     if (likesRaw is List) {
       for (final e in likesRaw) {
         if (e is Map) {
-          final id = e['id'] ?? e['user_id'];
+          final map = Map<String, dynamic>.from(e);
+          final nestedUser = map['user'];
+          final userMap = nestedUser is Map
+              ? Map<String, dynamic>.from(nestedUser)
+              : map;
+          final id = userMap['id'] ?? map['user_id'];
           if (id != null) likes.add(id.toString());
+          final n = userMap['name']?.toString() ??
+              '${userMap['first_name'] ?? ''} ${userMap['last_name'] ?? ''}'.trim();
+          if (n.isNotEmpty) likeNames.add(n);
         } else if (e != null) {
           likes.add(e.toString());
         }
@@ -146,6 +157,7 @@ class PostModel extends Post {
       videoUrl: _string(json['video_url'] ?? json['videoUrl']),
       createdAt: _parseDate(json['created_at'] ?? json['createdAt']),
       likes: likes,
+      likeNames: likeNames,
       comments: comments,
       location: _string(json['location'] ?? json['place']),
       eventName: _string(json['event_name'] ?? json['eventName']),
@@ -161,6 +173,7 @@ class PostModel extends Post {
       'videoUrl': videoUrl,
       'createdAt': createdAt.toIso8601String(),
       'likes': likes,
+      'likeNames': likeNames,
       'comments':
           comments.map((e) => (e as CommentModel).toMap()).toList(),
       'location': location,

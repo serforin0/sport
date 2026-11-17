@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'add_card_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sport/features/demo/presentation/providers/demo_showcase_providers.dart';
+import 'package:sport/features/demo/presentation/widgets/demo_badge.dart';
 
-class PaymentMethodsPage extends StatelessWidget {
+class PaymentMethodsPage extends ConsumerWidget {
   const PaymentMethodsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showcase = ref.watch(demoShowcaseProvider);
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
@@ -26,43 +29,44 @@ class PaymentMethodsPage extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                const _CardItem(
-                  brand: 'VISA',
-                  last4: '4242',
-                  expiry: '12/26',
-                  isDefault: true,
-                ),
-                const _CardItem(
-                  brand: 'MASTERCARD',
-                  last4: '8812',
-                  expiry: '09/25',
-                  isDefault: false,
-                ),
-                const SizedBox(height: 16),
-                _AddPaymentMethodTile(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AddCardPage()),
-                  ),
-                ),
-              ],
+      body: showcase.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => Center(
+          child: TextButton(
+            onPressed: () => ref.invalidate(demoShowcaseProvider),
+            child: const Text(
+              'No se pudieron cargar los métodos simulados.\nReintentar',
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Text(
-              'Tus pagos están protegidos con encriptación de extremo a extremo.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 12),
+        ),
+        data: (data) => ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            const Align(alignment: Alignment.centerLeft, child: DemoBadge()),
+            const SizedBox(height: 12),
+            const Text(
+              'Solo se muestran identificadores enmascarados. HubSport no '
+              'solicita ni almacena PAN o CVV en esta vista.',
+              style: TextStyle(color: Colors.white60),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            for (final method in data.billing.paymentMethods)
+              _CardItem(
+                brand: method.brand.toUpperCase(),
+                last4: method.last4,
+                expiry: method.expiry ?? 'N/D',
+                isDefault: method.isDefault,
+              ),
+            const SizedBox(height: 16),
+            _AddPaymentMethodTile(
+              onTap: () => showDemoSimulation(
+                context,
+                'Agregar tarjeta es una simulación. No se solicitarán ni '
+                'guardarán número de tarjeta, fecha o CVV.',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -87,16 +91,20 @@ class _CardItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDefault ? const Color(0xFF3B82F6).withOpacity(0.5) : Colors.white.withOpacity(0.08)),
+        border: Border.all(
+          color: isDefault
+              ? const Color(0xFF3B82F6).withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.08),
+        ),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -112,7 +120,11 @@ class _CardItem extends StatelessWidget {
               children: [
                 Text(
                   '$brand •••• $last4',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -126,14 +138,24 @@ class _CardItem extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: const Color(0xFF3B82F6).withOpacity(0.15),
+                color: const Color(0xFF3B82F6).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Text('PRINCIPAL', style: TextStyle(color: Color(0xFF3B82F6), fontSize: 9, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'PRINCIPAL',
+                style: TextStyle(
+                  color: Color(0xFF3B82F6),
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           IconButton(
             icon: const Icon(Icons.more_vert, color: Colors.white24),
-            onPressed: () {},
+            onPressed: () => showDemoSimulation(
+              context,
+              'La edición de métodos de pago está deshabilitada en la demo.',
+            ),
           ),
         ],
       ),
@@ -163,7 +185,11 @@ class _AddPaymentMethodTile extends StatelessWidget {
             SizedBox(width: 8),
             Text(
               'Agregar nuevo método de pago',
-              style: TextStyle(color: Color(0xFF3B82F6), fontWeight: FontWeight.bold, fontSize: 14),
+              style: TextStyle(
+                color: Color(0xFF3B82F6),
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
             ),
           ],
         ),

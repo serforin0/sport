@@ -5,6 +5,7 @@ import 'package:sport/features/events/domain/entities/sport_event.dart';
 import 'package:sport/features/events/presentation/pages/create_event_page.dart';
 import 'package:sport/features/events/presentation/pages/event_detail_page.dart';
 import 'package:sport/features/events/presentation/providers/events_providers.dart';
+import 'package:sport/features/demo/presentation/widgets/demo_badge.dart';
 
 class EventsListPage extends ConsumerWidget {
   const EventsListPage({super.key});
@@ -18,9 +19,13 @@ class EventsListPage extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F172A),
         leading: const BackButton(color: Colors.white),
-        title: const Text('Eventos deportivos', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Eventos deportivos',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
         actions: [
+          const Center(child: DemoBadge()),
           IconButton(
             icon: const Icon(Icons.add, color: Colors.white),
             onPressed: () => Navigator.push(
@@ -34,7 +39,10 @@ class EventsListPage extends ConsumerWidget {
         data: (events) {
           if (events.isEmpty) {
             return const Center(
-              child: Text('No hay eventos disponibles todavía', style: TextStyle(color: Colors.white54)),
+              child: Text(
+                'No hay eventos disponibles todavía',
+                style: TextStyle(color: Colors.white54),
+              ),
             );
           }
 
@@ -50,15 +58,19 @@ class EventsListPage extends ConsumerWidget {
         loading: () => ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: 6,
-          itemBuilder: (_, __) => const _EventSkeleton(),
+          itemBuilder: (_, _) => const _EventSkeleton(),
         ),
         error: (error, _) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('Error al cargar eventos', style: TextStyle(color: Colors.white70)),
+              const Text(
+                'Error al cargar eventos',
+                style: TextStyle(color: Colors.white70),
+              ),
               TextButton(
-                onPressed: () => ref.read(eventsListProvider.notifier).refresh(),
+                onPressed: () =>
+                    ref.read(eventsListProvider.notifier).refresh(),
                 child: const Text('Reintentar'),
               ),
             ],
@@ -93,18 +105,26 @@ class _EventCard extends StatelessWidget {
               height: 150,
               width: double.infinity,
               child: event.photoUrl?.isNotEmpty == true
-                  ? CachedNetworkImage(imageUrl: event.photoUrl!, fit: BoxFit.cover)
-                  : Container(
-                      color: Colors.white10,
-                      child: const Icon(Icons.event, color: Colors.white24, size: 48),
-                    ),
+                  ? CachedNetworkImage(
+                      imageUrl: event.photoUrl!,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, _, _) => const _EventPhotoFallback(),
+                    )
+                  : const _EventPhotoFallback(),
             ),
             Padding(
               padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(event.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17)),
+                  Text(
+                    event.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                    ),
+                  ),
                   const SizedBox(height: 6),
                   Text(
                     [
@@ -117,9 +137,19 @@ class _EventCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      const Icon(Icons.group, color: Color(0xFF2CB5FF), size: 16),
+                      const Icon(
+                        Icons.group,
+                        color: Color(0xFF2CB5FF),
+                        size: 16,
+                      ),
                       const SizedBox(width: 6),
-                      Text('${event.participantsCount} participantes', style: const TextStyle(color: Colors.white60, fontSize: 12)),
+                      Text(
+                        '${event.participantsCount} participantes',
+                        style: const TextStyle(
+                          color: Colors.white60,
+                          fontSize: 12,
+                        ),
+                      ),
                       const Spacer(),
                       const Icon(Icons.chevron_right, color: Colors.white30),
                     ],
@@ -145,6 +175,26 @@ class _EventSkeleton extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(18),
+      ),
+    );
+  }
+}
+
+class _EventPhotoFallback extends StatelessWidget {
+  const _EventPhotoFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Foto de evento no disponible',
+      child: Container(
+        color: Colors.white10,
+        alignment: Alignment.center,
+        child: const Icon(
+          Icons.event,
+          color: Colors.white24,
+          size: 48,
+        ),
       ),
     );
   }

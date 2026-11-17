@@ -5,6 +5,7 @@ class StatisticsPage extends StatelessWidget {
   final String userRole;
   final String userLocation;
   final String? photoUrl;
+  final List<dynamic>? stats;
 
   const StatisticsPage({
     super.key,
@@ -12,10 +13,32 @@ class StatisticsPage extends StatelessWidget {
     required this.userRole,
     required this.userLocation,
     this.photoUrl,
+    this.stats,
   });
+
+  List<Map<String, String>> _rows() {
+    return (stats ?? [])
+        .whereType<Map>()
+        .map(
+          (item) => {
+            'season': (item['season'] ?? item['year'] ?? item['label'] ?? '')
+                .toString(),
+            'rank': (item['rank'] ?? item['position'] ?? '').toString(),
+            'points': (item['points'] ?? item['pts'] ?? item['value'] ?? '')
+                .toString(),
+            'matches': (item['matches'] ?? item['games'] ?? '').toString(),
+            'wins': (item['wins'] ?? '').toString(),
+            'podiums': (item['podiums'] ?? item['poles'] ?? '').toString(),
+          },
+        )
+        .where((item) => item.values.any((value) => value.isNotEmpty))
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final rows = _rows();
+
     return Scaffold(
       backgroundColor: const Color(0xFF1E293B),
       appBar: AppBar(
@@ -41,9 +64,12 @@ class StatisticsPage extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundImage: photoUrl != null 
-                    ? NetworkImage(photoUrl!) 
-                    : const NetworkImage('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1974&auto=format&fit=crop'),
+                  backgroundImage: photoUrl != null
+                      ? NetworkImage(photoUrl!)
+                      : null,
+                  child: photoUrl == null
+                      ? const Icon(Icons.person, color: Colors.white54)
+                      : null,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -75,7 +101,7 @@ class StatisticsPage extends StatelessWidget {
           // Table Header
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            color: const Color(0xFF0F172A).withOpacity(0.5),
+            color: const Color(0xFF0F172A).withValues(alpha: 0.5),
             child: const Row(
               children: [
                 Expanded(flex: 2, child: _TableHeaderText('Temporada')),
@@ -83,19 +109,36 @@ class StatisticsPage extends StatelessWidget {
                 Expanded(child: _TableHeaderText('Pts')),
                 Expanded(child: _TableHeaderText('Partidas')),
                 Expanded(child: _TableHeaderText('Victorias')),
-                Expanded(child: _TableHeaderText('Poles')),
+                Expanded(child: _TableHeaderText('Podios')),
               ],
             ),
           ),
-          // Table Body
           Expanded(
-            child: ListView(
-              children: const [
-                _StatRow(year: '2024', rank: '18', pts: '6', matches: '6', wins: '1', poles: '1'),
-                _StatRow(year: '2023', rank: '18', pts: '6', matches: '6', wins: '0', poles: '0'),
-                _StatRow(year: '2022', rank: '50', pts: '0', matches: '3', wins: '0', poles: '0'),
-              ],
-            ),
+            child: rows.isEmpty
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text(
+                        'Aún no hay estadísticas registradas para este perfil.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white54),
+                      ),
+                    ),
+                  )
+                : ListView(
+                    children: rows
+                        .map(
+                          (row) => _StatRow(
+                            season: row['season'] ?? '',
+                            rank: row['rank'] ?? '',
+                            points: row['points'] ?? '',
+                            matches: row['matches'] ?? '',
+                            wins: row['wins'] ?? '',
+                            podiums: row['podiums'] ?? '',
+                          ),
+                        )
+                        .toList(),
+                  ),
           ),
         ],
       ),
@@ -122,20 +165,20 @@ class _TableHeaderText extends StatelessWidget {
 }
 
 class _StatRow extends StatelessWidget {
-  final String year;
+  final String season;
   final String rank;
-  final String pts;
+  final String points;
   final String matches;
   final String wins;
-  final String poles;
+  final String podiums;
 
   const _StatRow({
-    required this.year,
+    required this.season,
     required this.rank,
-    required this.pts,
+    required this.points,
     required this.matches,
     required this.wins,
-    required this.poles,
+    required this.podiums,
   });
 
   @override
@@ -147,12 +190,12 @@ class _StatRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(flex: 2, child: _StatValueText(year, isBold: false)),
+          Expanded(flex: 2, child: _StatValueText(season, isBold: false)),
           Expanded(child: _StatValueText(rank)),
-          Expanded(child: _StatValueText(pts)),
+          Expanded(child: _StatValueText(points)),
           Expanded(child: _StatValueText(matches)),
           Expanded(child: _StatValueText(wins)),
-          Expanded(child: _StatValueText(poles)),
+          Expanded(child: _StatValueText(podiums)),
         ],
       ),
     );

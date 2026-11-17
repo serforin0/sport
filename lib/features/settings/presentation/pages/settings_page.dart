@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sport/features/auth/presentation/providers/auth_providers.dart';
 import '../providers/profile_providers.dart';
 import 'edit_profile_page.dart';
 import 'general_settings_page.dart';
 import 'notification_settings_page.dart';
-import 'billing_settings_page.dart';
 import 'privacy_settings_page.dart';
 import 'security_settings_page.dart';
 import 'social_settings_page.dart';
 import 'help_support_page.dart';
 import 'contact_support_page.dart';
+import 'billing_settings_page.dart';
+import 'package:sport/features/demo/presentation/pages/collaborations_showcase_page.dart';
+import 'package:sport/features/demo/presentation/pages/groups_showcase_page.dart';
+import 'package:sport/features/demo/presentation/pages/sponsorships_showcase_page.dart';
+import 'package:sport/features/demo/presentation/pages/store_showcase_page.dart';
+import 'package:sport/features/events/presentation/pages/events_list_page.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -17,6 +23,7 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(profileControllerProvider(null));
+    final user = ref.watch(authControllerProvider).valueOrNull;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
@@ -62,7 +69,9 @@ class SettingsPage extends ConsumerWidget {
               subtitle: 'Categoría, Deporte, Posición',
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const EditProfilePage()), // Apunta a la misma por ahora
+                MaterialPageRoute(
+                  builder: (_) => const EditProfilePage(),
+                ), // Apunta a la misma por ahora
               ),
             ),
 
@@ -82,27 +91,9 @@ class SettingsPage extends ConsumerWidget {
               subtitle: 'Push, Correo y Actividad',
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const NotificationSettingsPage()),
-              ),
-            ),
-
-            const _SettingsHeader(title: 'SUSCRIPCIONES'),
-            _SettingsTile(
-              icon: Icons.star_outline,
-              title: 'HubSport Premium',
-              subtitle: 'Gestionar mi plan actual',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const BillingSettingsPage()),
-              ),
-            ),
-            _SettingsTile(
-              icon: Icons.credit_card_outlined,
-              title: 'Métodos de pago',
-              subtitle: 'Tarjetas y facturación',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const BillingSettingsPage()),
+                MaterialPageRoute(
+                  builder: (_) => const NotificationSettingsPage(),
+                ),
               ),
             ),
 
@@ -134,6 +125,80 @@ class SettingsPage extends ConsumerWidget {
               ),
             ),
 
+            if (user?.demoPreview == true) ...[
+              const _SettingsHeader(title: 'VISTA DE DEMOSTRACIÓN'),
+              if (user!.canAccessDemoFeature('events'))
+                _SettingsTile(
+                  icon: Icons.event_outlined,
+                  title: 'Eventos',
+                  subtitle: 'Datos reales del entorno demo',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EventsListPage()),
+                  ),
+                ),
+              if (user.canAccessDemoFeature('sponsorships'))
+                _SettingsTile(
+                  icon: Icons.workspace_premium_outlined,
+                  title: 'Patrocinios',
+                  subtitle: 'Vista de demostración',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SponsorshipsShowcasePage(),
+                    ),
+                  ),
+                ),
+              if (user.canAccessDemoFeature('groups'))
+                _SettingsTile(
+                  icon: Icons.groups_outlined,
+                  title: 'Grupos',
+                  subtitle: 'Vista de demostración',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const GroupsShowcasePage(),
+                    ),
+                  ),
+                ),
+              if (user.canAccessDemoFeature('collaborations'))
+                _SettingsTile(
+                  icon: Icons.handshake_outlined,
+                  title: 'Colaboración',
+                  subtitle: 'Vista de demostración',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const CollaborationsShowcasePage(),
+                    ),
+                  ),
+                ),
+              if (user.canAccessDemoFeature('store'))
+                _SettingsTile(
+                  icon: Icons.storefront_outlined,
+                  title: 'Tienda',
+                  subtitle: 'Vista de demostración',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const StoreShowcasePage(),
+                    ),
+                  ),
+                ),
+              if (user.canAccessDemoFeature('billing'))
+                _SettingsTile(
+                  icon: Icons.receipt_long_outlined,
+                  title: 'Facturación',
+                  subtitle: 'Sin cobros ni datos financieros reales',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const BillingSettingsPage(),
+                    ),
+                  ),
+                ),
+            ],
+
             const _SettingsHeader(title: 'CUENTA'),
             _SettingsTile(
               icon: Icons.link,
@@ -164,7 +229,12 @@ class SettingsPage extends ConsumerWidget {
             const SizedBox(height: 32),
             Center(
               child: TextButton(
-                onPressed: () {},
+                onPressed: () async {
+                  await ref.read(authControllerProvider.notifier).signOut();
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
+                },
                 style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
                 child: const Text(
                   'Cerrar sesión',
@@ -227,14 +297,20 @@ class _SettingsTile extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+        ),
       ),
-      subtitle: subtitle != null 
-          ? Text(subtitle!, style: const TextStyle(color: Colors.white38, fontSize: 13)) 
+      subtitle: subtitle != null
+          ? Text(
+              subtitle!,
+              style: const TextStyle(color: Colors.white38, fontSize: 13),
+            )
           : null,
       trailing: const Icon(Icons.chevron_right, color: Colors.white24),
       onTap: onTap,
     );
   }
 }
-

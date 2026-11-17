@@ -271,7 +271,17 @@ class _NotificationTile extends ConsumerWidget {
         }
 
         final relatedId = notification.relatedId;
-        if (relatedId == null || relatedId.isEmpty) return;
+        if (relatedId == null || relatedId.isEmpty) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(notification.message),
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+          return;
+        }
 
         if (notification.type == NotificationType.newPost || 
             notification.type == NotificationType.comment || 

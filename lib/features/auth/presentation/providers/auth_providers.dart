@@ -6,7 +6,6 @@ import 'package:sport/core/network/api_client.dart';
 import 'package:sport/core/providers/shared_preferences_provider.dart';
 import 'package:sport/features/auth/data/repositories/auth_repository_impl.dart';
 
-
 // Repository provider
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
@@ -25,16 +24,31 @@ class AuthController extends StateNotifier<AsyncValue<User?>> {
   Future<void> _checkStatus() async {
     final result = await _repository.getCurrentUser();
     result.fold(
-      (failure) => state = AsyncValue.error(failure.message, StackTrace.current),
+      (failure) =>
+          state = AsyncValue.error(failure.message, StackTrace.current),
       (user) => state = AsyncValue.data(user),
     );
   }
 
   Future<void> signIn(String email, String password) async {
     state = const AsyncValue.loading();
-    final result = await _repository.signInWithEmailAndPassword(email, password);
+    final result = await _repository.signInWithEmailAndPassword(
+      email,
+      password,
+    );
     result.fold(
-      (failure) => state = AsyncValue.error(failure.message, StackTrace.current),
+      (failure) =>
+          state = AsyncValue.error(failure.message, StackTrace.current),
+      (user) => state = AsyncValue.data(user),
+    );
+  }
+
+  Future<void> signInAsDemoUser() async {
+    state = const AsyncValue.loading();
+    final result = await _repository.signInAsDemoUser();
+    result.fold(
+      (failure) =>
+          state = AsyncValue.error(failure.message, StackTrace.current),
       (user) => state = AsyncValue.data(user),
     );
   }
@@ -73,7 +87,8 @@ class AuthController extends StateNotifier<AsyncValue<User?>> {
       avatarPath: avatarPath,
     );
     result.fold(
-      (failure) => state = AsyncValue.error(failure.message, StackTrace.current),
+      (failure) =>
+          state = AsyncValue.error(failure.message, StackTrace.current),
       (user) => state = AsyncValue.data(user),
     );
   }
@@ -82,7 +97,8 @@ class AuthController extends StateNotifier<AsyncValue<User?>> {
     state = const AsyncValue.loading();
     final result = await _repository.signOut();
     result.fold(
-      (failure) => state = AsyncValue.error(failure.message, StackTrace.current),
+      (failure) =>
+          state = AsyncValue.error(failure.message, StackTrace.current),
       (_) => state = const AsyncValue.data(null),
     );
   }
@@ -124,22 +140,24 @@ class AuthController extends StateNotifier<AsyncValue<User?>> {
     );
 
     result.fold(
-      (failure) => state = AsyncValue.error(failure.message, StackTrace.current),
+      (failure) =>
+          state = AsyncValue.error(failure.message, StackTrace.current),
       (user) => state = AsyncValue.data(user),
     );
   }
 }
 
-
-final authControllerProvider = StateNotifierProvider<AuthController, AsyncValue<User?>>((ref) {
-  final repository = ref.watch(authRepositoryProvider);
-  return AuthController(repository);
-});
+final authControllerProvider =
+    StateNotifierProvider<AuthController, AsyncValue<User?>>((ref) {
+      final repository = ref.watch(authRepositoryProvider);
+      return AuthController(repository);
+    });
 
 // Forgot Password Flow
-final forgotPasswordNotifierProvider = StateNotifierProvider<ForgotPasswordNotifier, AsyncValue<String?>>((ref) {
-  return ForgotPasswordNotifier(ref.watch(authRepositoryProvider));
-});
+final forgotPasswordNotifierProvider =
+    StateNotifierProvider<ForgotPasswordNotifier, AsyncValue<String?>>((ref) {
+      return ForgotPasswordNotifier(ref.watch(authRepositoryProvider));
+    });
 
 class ForgotPasswordNotifier extends StateNotifier<AsyncValue<String?>> {
   final AuthRepository _repository;
@@ -160,9 +178,17 @@ class ForgotPasswordNotifier extends StateNotifier<AsyncValue<String?>> {
     );
   }
 
-  Future<bool> resetPassword({required String email, required String code, required String password}) async {
+  Future<bool> resetPassword({
+    required String email,
+    required String code,
+    required String password,
+  }) async {
     state = const AsyncValue.loading();
-    final result = await _repository.resetPassword(email: email, code: code, password: password);
+    final result = await _repository.resetPassword(
+      email: email,
+      code: code,
+      password: password,
+    );
     return result.fold(
       (failure) {
         state = AsyncValue.error(failure.message, StackTrace.current);

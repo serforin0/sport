@@ -3,6 +3,14 @@ import 'package:flutter/material.dart';
 class SocialSettingsPage extends StatelessWidget {
   const SocialSettingsPage({super.key});
 
+  void _showComingSoon(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Esta opción estará disponible próximamente'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,10 +42,8 @@ class SocialSettingsPage extends StatelessWidget {
             _SocialTile(
               icon: Icons.block_outlined,
               title: 'Usuarios bloqueados',
-              subtitle: '2 usuarios bloqueados',
-              onTap: () {
-                // Ver lista de bloqueados
-              },
+              subtitle: 'Próximamente',
+              onTap: () => _showComingSoon(context),
             ),
 
             const SizedBox(height: 16),
@@ -45,12 +51,16 @@ class SocialSettingsPage extends StatelessWidget {
             _SocialTile(
               icon: Icons.account_circle_outlined,
               title: 'Google',
-              subtitle: 'Vinculado como miguel.ov@gmail.com',
+              subtitle: 'Próximamente',
               trailing: const Text(
-                'DESVINCULAR',
-                style: TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.bold),
+                'NO DISPONIBLE',
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             _SocialTile(
               icon: Icons.apple,
@@ -58,9 +68,13 @@ class SocialSettingsPage extends StatelessWidget {
               subtitle: 'No vinculado',
               trailing: const Text(
                 'VINCULAR',
-                style: TextStyle(color: Color(0xFF3B82F6), fontSize: 11, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Color(0xFF3B82F6),
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             _SocialTile(
               icon: Icons.facebook,
@@ -68,9 +82,13 @@ class SocialSettingsPage extends StatelessWidget {
               subtitle: 'No vinculado',
               trailing: const Text(
                 'VINCULAR',
-                style: TextStyle(color: Color(0xFF3B82F6), fontSize: 11, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Color(0xFF3B82F6),
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
 
             const SizedBox(height: 32),
@@ -79,12 +97,16 @@ class SocialSettingsPage extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.share_outlined, color: Color(0xFF3B82F6), size: 32),
+                    const Icon(
+                      Icons.share_outlined,
+                      color: Color(0xFF3B82F6),
+                      size: 32,
+                    ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -102,7 +124,7 @@ class SocialSettingsPage extends StatelessWidget {
                           Text(
                             'Comparte HubSport y entrena con tu equipo.',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
+                              color: Colors.white.withValues(alpha: 0.5),
                               fontSize: 13,
                             ),
                           ),
@@ -163,19 +185,27 @@ class _SocialTile extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, color: Colors.white, size: 20),
       ),
       title: Text(
         title,
-        style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+        ),
       ),
       subtitle: subtitle != null
-          ? Text(subtitle!, style: const TextStyle(color: Colors.white38, fontSize: 13))
+          ? Text(
+              subtitle!,
+              style: const TextStyle(color: Colors.white38, fontSize: 13),
+            )
           : null,
-      trailing: trailing ?? const Icon(Icons.chevron_right, color: Colors.white24),
+      trailing:
+          trailing ?? const Icon(Icons.chevron_right, color: Colors.white24),
       onTap: onTap,
     );
   }

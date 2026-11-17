@@ -17,12 +17,12 @@ class ReferencesRepository {
       final response = await apiClient.get('/references');
       final data = unwrapDataMap(response.data) ?? {};
       final received = (data['received'] is List ? data['received'] as List : const [])
-          .whereType<Map<String, dynamic>>()
-          .map(ReferenceRequestModel.fromApi)
+          .whereType<Map>()
+          .map((e) => ReferenceRequestModel.fromApi(Map<String, dynamic>.from(e)))
           .toList();
       final sent = (data['sent'] is List ? data['sent'] as List : const [])
-          .whereType<Map<String, dynamic>>()
-          .map(ReferenceRequestModel.fromApi)
+          .whereType<Map>()
+          .map((e) => ReferenceRequestModel.fromApi(Map<String, dynamic>.from(e)))
           .toList();
 
       return Ok(ReferencesInbox(received: received, sent: sent));
