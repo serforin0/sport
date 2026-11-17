@@ -55,4 +55,5 @@ current_analysis.txt
 # Project docs live outside this repo (workspace documentacion/)
 /docs/
 /*.md
+!/README.md
 !/LICENSE
