@@ -51,3 +51,8 @@ analysis_output.txt
 build_output.txt
 final_check.txt
 current_analysis.txt
+
+# Project docs live outside this repo (workspace documentacion/)
+/docs/
+/*.md
+!/LICENSE
