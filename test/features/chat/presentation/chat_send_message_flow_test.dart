@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sport/features/chat/domain/entities/chat_conversation.dart';
 import 'package:sport/features/chat/domain/entities/chat_message.dart';
@@ -12,6 +13,11 @@ class MockChatRepository extends Mock implements ChatRepository {}
 
 void main() {
   late MockChatRepository chat;
+
+  setUpAll(() async {
+    await initializeDateFormatting('es');
+    await initializeDateFormatting('en');
+  });
 
   final conversation = ChatConversation(
     id: 'conv1',
@@ -30,7 +36,7 @@ void main() {
         id: 'm1',
         text: 'Hola Laura',
         senderId: 'me',
-        timestamp: DateTime(2026, 1, 1, 12),
+        timestamp: DateTime.now(),
       ),
     );
   });
@@ -49,6 +55,9 @@ void main() {
     await tester.enterText(find.byType(TextField), 'Hola Laura');
     await tester.pump();
     await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump();
+    // ConversationPage agenda un scroll con Future.delayed(150ms).
+    await tester.pump(const Duration(milliseconds: 200));
     await tester.pumpAndSettle();
 
     verify(() => chat.sendMessage('conv1', 'Hola Laura')).called(1);
