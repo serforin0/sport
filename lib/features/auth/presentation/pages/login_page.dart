@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sport/core/widgets/hubsport_wordmark.dart';
 import 'package:sport/features/auth/presentation/providers/auth_providers.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/primary_button.dart';
@@ -60,15 +61,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             children: [
               const SizedBox(height: 20),
               const Center(
-                child: Text(
-                  'HUBSPORT',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 2.0,
-                  ),
-                ),
+                child: HubSportWordmark(fontSize: 32, letterSpacing: 2.0),
               ),
               const SizedBox(height: 48),
               CustomTextField(

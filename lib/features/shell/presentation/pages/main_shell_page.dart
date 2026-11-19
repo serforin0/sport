@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:sport/features/feed/presentation/pages/feed_page.dart';
 import 'package:sport/features/feed/presentation/pages/create_post_page.dart';
 import 'package:sport/features/search/presentation/pages/search_page.dart';
-import 'package:sport/features/chat/presentation/pages/chat_list_page.dart';
+import 'package:sport/features/events/presentation/pages/events_list_page.dart';
 import 'package:sport/features/profile/presentation/pages/profile_page.dart';
 
-
+/// Shell alternativo (legacy): Eventos reemplaza Mensajes en bottom nav.
 class MainShellPage extends StatefulWidget {
   const MainShellPage({Key? key}) : super(key: key);
 
@@ -17,13 +17,12 @@ class _MainShellPageState extends State<MainShellPage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const FeedPage(),         // Index 0
-    const SearchPage(),       // Index 1
-    const CreatePostPage(),   // Index 2
-    const ChatListPage(),     // Index 3
-    const ProfilePage(),      // Index 4
+    const FeedPage(),
+    const SearchPage(),
+    const CreatePostPage(),
+    const EventsListPage(),
+    const ProfilePage(),
   ];
-
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +56,8 @@ class _MainShellPageState extends State<MainShellPage> {
             label: 'Crear',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.mail_outline),
-            label: 'Mensajes',
+            icon: Icon(Icons.event_outlined),
+            label: 'Eventos',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

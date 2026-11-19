@@ -14,6 +14,8 @@ import 'package:sport/features/stories/presentation/providers/stories_providers.
 import 'package:sport/features/stories/presentation/widgets/stories_bar.dart';
 import 'package:sport/features/profile/presentation/widgets/profile_drawer.dart';
 import 'package:sport/features/people/presentation/pages/people_page.dart';
+import 'package:sport/features/chat/presentation/pages/chat_list_page.dart';
+import 'package:sport/core/widgets/hubsport_wordmark.dart';
 
 
 class FeedPage extends ConsumerWidget {
@@ -127,14 +129,9 @@ class _FeedHeader extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Expanded(
-            child: Text(
-              'HUBSPORT',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.5,
-              ),
+            child: HubSportWordmark(
+              fontSize: 24,
+              textAlign: TextAlign.left,
             ),
           ),
           IconButton(
@@ -142,6 +139,14 @@ class _FeedHeader extends ConsumerWidget {
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const SearchPage()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Chat',
+            icon: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 24),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ChatListPage()),
             ),
           ),
           IconButton(
@@ -189,7 +194,6 @@ class _FeedHeader extends ConsumerWidget {
                   : null,
             ),
           ),
-
           const SizedBox(width: 8),
         ],
       ),

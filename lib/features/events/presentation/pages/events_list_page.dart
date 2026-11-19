@@ -18,7 +18,10 @@ class EventsListPage extends ConsumerWidget {
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F172A),
-        leading: const BackButton(color: Colors.white),
+        automaticallyImplyLeading: Navigator.canPop(context),
+        leading: Navigator.canPop(context)
+            ? const BackButton(color: Colors.white)
+            : null,
         title: const Text(
           'Eventos deportivos',
           style: TextStyle(color: Colors.white),

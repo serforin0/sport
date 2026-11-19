@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sport/features/chat/presentation/pages/chat_list_page.dart';
+import 'package:sport/features/events/presentation/pages/events_list_page.dart';
 import 'package:sport/features/feed/presentation/pages/create_post_page.dart';
 import 'package:sport/features/feed/presentation/pages/feed_page.dart';
 import 'package:sport/features/people/presentation/pages/people_page.dart';
 import 'package:sport/features/jobs/presentation/pages/jobs_list_page.dart';
 
-/// Contenedor principal con barra inferior (Inicio, Personas, +, Trabajo, Chat).
+/// Contenedor principal: Inicio, Personas, +, Trabajo, Eventos.
+/// Chat vive en la barra superior del feed (junto a notificaciones).
 class MainShell extends ConsumerStatefulWidget {
   const MainShell({super.key});
 
@@ -27,7 +28,7 @@ class _MainShellState extends ConsumerState<MainShell> {
           PeoplePage(),
           SizedBox.shrink(),
           JobsListPage(),
-          ChatListPage(),
+          EventsListPage(),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -41,7 +42,10 @@ class _MainShellState extends ConsumerState<MainShell> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: const Color(0xFFFF5C1A),
-              content: const Text('Publicación Exitosa', style: TextStyle(color: Colors.white)),
+              content: const Text(
+                'Publicación Exitosa',
+                style: TextStyle(color: Colors.white),
+              ),
               action: SnackBarAction(
                 label: 'Ver publicación',
                 textColor: Colors.white,
@@ -87,9 +91,9 @@ class _MainShellState extends ConsumerState<MainShell> {
               onTap: () => setState(() => _index = 3),
             ),
             _BarItem(
-              icon: Icons.chat_bubble_outline_rounded,
-              activeIcon: Icons.chat_bubble_rounded,
-              label: 'Chat',
+              icon: Icons.event_outlined,
+              activeIcon: Icons.event,
+              label: 'Eventos',
               selected: _index == 4,
               onTap: () => setState(() => _index = 4),
             ),
@@ -120,17 +124,16 @@ class _BarItem extends StatelessWidget {
     final c = selected ? const Color(0xFF3B82F6) : Colors.white38;
     return InkWell(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      child: SizedBox(
+        width: 64,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(selected ? activeIcon : icon, color: c, size: 24),
+            Icon(selected ? activeIcon : icon, color: c, size: 22),
             const SizedBox(height: 2),
             Text(
               label,
-              style: TextStyle(color: c, fontSize: 10, fontWeight: FontWeight.w500),
+              style: TextStyle(color: c, fontSize: 10, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -138,4 +141,3 @@ class _BarItem extends StatelessWidget {
     );
   }
 }
-

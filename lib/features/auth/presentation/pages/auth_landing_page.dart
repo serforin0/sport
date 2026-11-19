@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sport/core/config/api_config.dart';
+import 'package:sport/core/widgets/hubsport_wordmark.dart';
 import '../providers/auth_providers.dart';
 import 'registration_page.dart';
 import 'package:sport/core/widgets/video_background.dart';
@@ -80,15 +81,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
               child: Column(
                 children: [
                   const SizedBox(height: 60),
-                  const Text(
-                    'HUBSPORT',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 38,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
+                  const HubSportWordmark(fontSize: 38, letterSpacing: 1.5),
                   const SizedBox(height: 24),
 
                   // ✅ Evita overflow en tests y pantallas pequeñas.
@@ -137,9 +130,6 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                                               _passCtrl.text,
                                             );
                                       },
-                                      onSocialGoogle: () {},
-                                      onSocialFacebook: () {},
-                                      onSocialApple: () {},
                                       onGoRegister: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -158,9 +148,6 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                                               const RegistrationPage(),
                                         ),
                                       ),
-                                      onGoogle: () {},
-                                      onFacebook: () {},
-                                      onApple: () {},
                                       onDemoLogin: widget.enableDemoLogin
                                           ? () => ref
                                                 .read(
@@ -210,18 +197,12 @@ class _DefaultBackground extends StatelessWidget {
 class _Landing extends StatelessWidget {
   final VoidCallback onGoLogin;
   final VoidCallback onRegisterEmail;
-  final VoidCallback onGoogle;
-  final VoidCallback onFacebook;
-  final VoidCallback onApple;
   final VoidCallback? onDemoLogin;
 
   const _Landing({
     super.key,
     required this.onGoLogin,
     required this.onRegisterEmail,
-    required this.onGoogle,
-    required this.onFacebook,
-    required this.onApple,
     this.onDemoLogin,
   });
 
@@ -234,13 +215,13 @@ class _Landing extends StatelessWidget {
         children: [
           _PrimaryButton(
             text: 'ENTRAR',
-            backgroundColor: const Color(0xFF1E3A8A), // Azul oscuro
+            backgroundColor: const Color(0xFF1E3A8A),
             onTap: onGoLogin,
           ),
           const SizedBox(height: 16),
           _PrimaryButton(
             text: 'REGISTRARSE',
-            backgroundColor: const Color(0xFF3B82F6), // Azul claro
+            backgroundColor: const Color(0xFF3B82F6),
             onTap: onRegisterEmail,
           ),
           if (onDemoLogin != null) ...[
@@ -251,31 +232,6 @@ class _Landing extends StatelessWidget {
               onTap: onDemoLogin!,
             ),
           ],
-          const SizedBox(height: 32),
-          const Row(
-            children: [
-              Expanded(child: Divider(color: Colors.white24)),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'o continúa con',
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
-                ),
-              ),
-              Expanded(child: Divider(color: Colors.white24)),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _SocialIconButton(text: 'G', onTap: onGoogle),
-              const SizedBox(width: 16),
-              _SocialIconButton(text: 'f', onTap: onFacebook),
-              const SizedBox(width: 16),
-              _SocialIconButton(text: '', onTap: onApple),
-            ],
-          ),
           const SizedBox(height: 40),
         ],
       ),
@@ -291,11 +247,6 @@ class _LoginForm extends StatelessWidget {
 
   final VoidCallback onForgot;
   final VoidCallback onSubmit;
-
-  final VoidCallback onSocialGoogle;
-  final VoidCallback onSocialFacebook;
-  final VoidCallback onSocialApple;
-
   final VoidCallback onGoRegister;
 
   const _LoginForm({
@@ -306,9 +257,6 @@ class _LoginForm extends StatelessWidget {
     required this.onToggleObscure,
     required this.onForgot,
     required this.onSubmit,
-    required this.onSocialGoogle,
-    required this.onSocialFacebook,
-    required this.onSocialApple,
     required this.onGoRegister,
   });
 
@@ -362,27 +310,6 @@ class _LoginForm extends StatelessWidget {
           const SizedBox(height: 10),
 
           _PrimaryButton(text: 'Iniciar sesión', onTap: onSubmit),
-
-          const SizedBox(height: 16),
-
-          Center(
-            child: Text(
-              'Inicia sesión con',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.9)),
-            ),
-          ),
-          const SizedBox(height: 10),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _SocialIconButton(text: 'G', onTap: onSocialGoogle),
-              const SizedBox(width: 14),
-              _SocialIconButton(text: 'f', onTap: onSocialFacebook),
-              const SizedBox(width: 14),
-              _SocialIconButton(text: '', onTap: onSocialApple),
-            ],
-          ),
 
           const SizedBox(height: 18),
 
@@ -516,34 +443,3 @@ class _PrimaryButton extends StatelessWidget {
   }
 }
 
-class _SocialIconButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onTap;
-
-  const _SocialIconButton({required this.text, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 52,
-      height: 52,
-      child: OutlinedButton(
-        onPressed: onTap,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white,
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.35),
-            width: 1.2,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-        ),
-      ),
-    );
-  }
-}

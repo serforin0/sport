@@ -67,7 +67,7 @@ void main() {
     when(() => connections.fetchIncoming(any())).thenAnswer((_) async => []);
   });
 
-  testWidgets('shell monta tabs Inicio Personas Trabajo Chat', (tester) async {
+  testWidgets('shell monta tabs Inicio Personas Trabajo Eventos', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -89,11 +89,18 @@ void main() {
 
     expect(find.byType(MainShell), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.text('Eventos'), findsOneWidget);
+    expect(find.text('Chat'), findsNothing);
 
-    // Bottom destinations should be tappable without crash.
-    final peopleIcon = find.byIcon(Icons.people_outline);
+    final peopleIcon = find.byIcon(Icons.person_search_outlined);
     if (peopleIcon.evaluate().isNotEmpty) {
       await tester.tap(peopleIcon.first);
+      await tester.pumpAndSettle();
+    }
+
+    final eventsIcon = find.byIcon(Icons.event_outlined);
+    if (eventsIcon.evaluate().isNotEmpty) {
+      await tester.tap(eventsIcon.first);
       await tester.pumpAndSettle();
     }
   });

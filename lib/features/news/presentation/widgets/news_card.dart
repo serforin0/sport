@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/news_article.dart';
+import '../pages/news_detail_page.dart';
 
 class NewsCard extends StatelessWidget {
   final NewsArticle article;
@@ -9,7 +10,12 @@ class NewsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => NewsDetailPage(article: article)),
+      ),
+      child: Container(
       width: 260,
       margin: const EdgeInsets.only(right: 14),
       decoration: BoxDecoration(
@@ -112,6 +118,7 @@ class NewsCard extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

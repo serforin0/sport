@@ -10,6 +10,7 @@ import 'features/settings/presentation/providers/profile_providers.dart';
 import 'features/auth/presentation/providers/auth_providers.dart';
 import 'features/shell/main_shell.dart';
 import 'features/onboarding/presentation/providers/onboarding_providers.dart';
+import 'core/widgets/hubsport_wordmark.dart';
 
 // Eliminado provider duplicado, se usa el de onboarding_providers.dart
 
@@ -83,15 +84,7 @@ class _Splash extends StatelessWidget {
               ),
             );
           },
-          child: const Text(
-            'HUBSPORT',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 42,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 2,
-            ),
-          ),
+          child: const HubSportWordmark(fontSize: 42, letterSpacing: 2),
         ),
       ),
     );

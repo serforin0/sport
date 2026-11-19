@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../providers/news_providers.dart';
 import '../../domain/entities/news_article.dart';
+import 'news_detail_page.dart';
 
 class AllNewsPage extends ConsumerWidget {
   const AllNewsPage({super.key});
@@ -59,7 +60,12 @@ class _NewsListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => NewsDetailPage(article: article)),
+      ),
+      child: Container(
       decoration: BoxDecoration(
         color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(14),
@@ -137,6 +143,7 @@ class _NewsListItem extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 
