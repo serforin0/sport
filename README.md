@@ -36,6 +36,17 @@ Requiere que el backend tenga `DEMO_LOGIN_ENABLED=true` y el dataset demo sembra
 flutter run --dart-define=ENABLE_DEMO_LOGIN=true
 ```
 
+### APK de prueba (debug) para cliente / QA
+
+```bash
+flutter build apk --debug \
+  --dart-define=ENABLE_DEMO_LOGIN=true \
+  --dart-define=API_BASE_URL=https://yordy.shop/api/v1
+```
+
+Salida: `build/app/outputs/flutter-apk/app-debug.apk`  
+Incluye el botón **USUARIO DE PRUEBA**. No usar este APK para Play Store.
+
 ## Tests y análisis
 
 ```bash
@@ -43,7 +54,17 @@ flutter test
 flutter analyze
 ```
 
-La suite cubre flujos de auth/registro, feed (list/create/like/comment), personas/conexiones, chat, jobs, search, notificaciones, shell y demo.
+La suite cubre auth/registro, feed (incl. Mi deporte), chat, jobs, search, notificaciones, shell, scout metrics, safety/reportes, RoleGuide, demo tienda y certificación de fases 6–7.
+
+### E2E (red real)
+
+```bash
+./scripts/run_e2e.sh
+# o forzar dispositivo:
+E2E_DEVICE=<deviceId> ./scripts/run_e2e.sh
+```
+
+Suite: `integration_test/hubsport_e2e_suite_test.dart` (login demo, feed/post, tienda, scout, reportes, chat).
 
 CI corre en `.github/workflows/ci.yml` (rama `ultimos-cambios/fixer` / PRs).
 
@@ -51,8 +72,10 @@ CI corre en `.github/workflows/ci.yml` (rama `ultimos-cambios/fixer` / PRs).
 
 | Ruta | Contenido |
 | ---- | --------- |
-| `lib/core/` | Config de API, cliente HTTP |
-| `lib/features/` | Módulos (auth, feed, chat, demo, …) |
+| `lib/core/` | Config de API, cliente HTTP, theme |
+| `lib/features/` | Módulos (auth, feed, chat, scout_metrics, safety, demo, …) |
+| `integration_test/` | E2E contra API demo |
 | `test/` | Unit / widget tests |
+| `scripts/run_e2e.sh` | Runner E2E (prioriza celular real) |
 
 Estado: **Riverpod**. Identificadores de código en inglés; docs de producto viven fuera de este repo.
