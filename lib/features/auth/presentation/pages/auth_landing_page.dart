@@ -71,7 +71,22 @@ class _AuthPageState extends ConsumerState<AuthPage> {
         fit: StackFit.expand,
         children: [
           bg,
-          Container(color: Colors.black.withValues(alpha: 0.45)),
+          Container(color: Colors.black.withValues(alpha: 0.35)),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Color(0x99000000),
+                  Color(0xE6000000),
+                ],
+                stops: [0.35, 0.7, 1],
+              ),
+            ),
+            child: SizedBox.expand(),
+          ),
           if (authState.isLoading)
             const Center(child: CircularProgressIndicator(color: Colors.white)),
           SafeArea(

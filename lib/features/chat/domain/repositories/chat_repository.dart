@@ -1,10 +1,11 @@
 import '../entities/chat_conversation.dart';
 import '../entities/chat_message.dart';
+import '../entities/send_message_result.dart';
 
 abstract class ChatRepository {
   Future<List<ChatConversation>> getConversations();
   Future<List<ChatMessage>> getMessages(String conversationId);
-  Future<ChatMessage> sendMessage(String conversationId, String text);
+  Future<SendMessageResult> sendMessage(String conversationId, String text);
 
   /// Abre un chat directo con un usuario (reutiliza conversación existente o `POST /chat`).
   Future<ChatConversation> ensureDirectChat({

@@ -16,11 +16,22 @@ class CreatePostPage extends ConsumerStatefulWidget {
 
 class _CreatePostPageState extends ConsumerState<CreatePostPage> {
   final _textController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _activityUrlController = TextEditingController();
   final _picker = ImagePicker();
   final List<XFile> _media = [];
   _PostAudience _audience = _PostAudience.public;
   _PostGroup? _selectedGroup;
+  String _postType = 'update';
   bool _isPosting = false;
+
+  static const _postTypes = [
+    ('update', 'Actualización'),
+    ('training', 'Entrenamiento'),
+    ('competition', 'Competencia'),
+    ('news', 'Noticia'),
+    ('other', 'Otro'),
+  ];
 
   static const _groups = [
     _PostGroup(name: 'Atletismo Dominicano', imageUrl: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1200&auto=format&fit=crop'),
@@ -41,6 +52,8 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
   @override
   void dispose() {
     _textController.dispose();
+    _locationController.dispose();
+    _activityUrlController.dispose();
     super.dispose();
   }
 
@@ -77,6 +90,12 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
     if (user == null || !_canPost) return;
 
     setState(() => _isPosting = true);
+    final location = _locationController.text.trim().isNotEmpty
+        ? _locationController.text.trim()
+        : _selectedGroup?.name;
+    final activity = _postType == 'training'
+        ? _activityUrlController.text.trim()
+        : '';
     final newPost = Post(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       author: user,
@@ -85,8 +104,10 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
       createdAt: DateTime.now(),
       likes: const [],
       comments: const [],
-      location: _selectedGroup?.name,
+      location: location,
       eventName: _audience == _PostAudience.group ? _selectedGroup?.name : null,
+      postType: _postType,
+      activityUrl: activity.isEmpty ? null : activity,
     );
 
     await ref.read(feedProvider.notifier).createPost(newPost);
@@ -256,6 +277,49 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                     ),
                     onChanged: (_) => setState(() {}),
                   ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    value: _postType,
+                    dropdownColor: const Color(0xFF1E293B),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Tipo de publicación',
+                      labelStyle: TextStyle(color: Colors.white70),
+                    ),
+                    items: _postTypes
+                        .map(
+                          (t) => DropdownMenuItem(
+                            value: t.$1,
+                            child: Text(t.$2),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) => setState(() => _postType = v ?? 'update'),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _locationController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Ubicación',
+                      labelStyle: TextStyle(color: Colors.white70),
+                      hintText: 'Ciudad, pista, estadio…',
+                      hintStyle: TextStyle(color: Colors.white38),
+                    ),
+                  ),
+                  if (_postType == 'training') ...[
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _activityUrlController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'URL actividad del reloj',
+                        labelStyle: TextStyle(color: Colors.white70),
+                        hintText: 'https://www.strava.com/activities/...',
+                        hintStyle: TextStyle(color: Colors.white38),
+                      ),
+                    ),
+                  ],
                   if (_media.isNotEmpty) ...[
                     const SizedBox(height: 18),
                     SizedBox(

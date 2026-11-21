@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sport/features/chat/domain/entities/chat_conversation.dart';
 import 'package:sport/features/chat/domain/entities/chat_message.dart';
+import 'package:sport/features/chat/domain/entities/send_message_result.dart';
 import 'package:sport/features/chat/domain/repositories/chat_repository.dart';
 
 class MockChatRepository extends Mock implements ChatRepository {}
@@ -36,7 +37,9 @@ void main() {
         contactAvatar: '',
       ),
     ).thenAnswer((_) async => conversation);
-    when(() => chat.sendMessage('conv1', 'Hola')).thenAnswer((_) async => sent);
+    when(() => chat.sendMessage('conv1', 'Hola')).thenAnswer(
+      (_) async => SendMessageResult(message: sent),
+    );
     when(() => chat.getMessages('conv1')).thenAnswer((_) async => [sent]);
     when(() => chat.getConversations()).thenAnswer((_) async => [conversation]);
 
@@ -47,8 +50,8 @@ void main() {
     );
     expect(opened.id, 'conv1');
 
-    final message = await chat.sendMessage(opened.id, 'Hola');
-    expect(message.text, 'Hola');
+    final result = await chat.sendMessage(opened.id, 'Hola');
+    expect(result.message.text, 'Hola');
 
     final messages = await chat.getMessages(opened.id);
     expect(messages, hasLength(1));

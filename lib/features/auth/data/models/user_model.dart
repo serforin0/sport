@@ -13,10 +13,22 @@ class UserModel extends User {
     super.country,
     super.city,
     super.mainSport,
+    super.sportId,
+    super.sportLockedAt,
     super.sportLevel,
     super.currentTeam,
     super.birthDate,
+    super.accountStatus,
+    super.isMinor,
+    super.slug,
+    super.handle,
+    super.connectionsCount,
+    super.mutualConnectionsCount,
     super.position,
+    super.heightCm,
+    super.weightKg,
+    super.wingspanCm,
+    super.laterality,
     super.experience,
     super.achievements,
     super.education,
@@ -56,6 +68,7 @@ class UserModel extends User {
     }
     String? countryName;
     String? sportName;
+    String? sportId;
     if (profile is Map) {
       final country = profile['country'];
       final sport = profile['sport'];
@@ -63,6 +76,8 @@ class UserModel extends User {
           ? country['name']?.toString()
           : country?.toString();
       sportName = sport is Map ? sport['name']?.toString() : sport?.toString();
+      sportId = profile['sport_id']?.toString() ??
+          (sport is Map ? sport['id']?.toString() : null);
     }
     Map<String, dynamic>? socialLinks;
     if (profile is Map && profile['social_links'] is Map) {
@@ -94,6 +109,10 @@ class UserModel extends User {
           ? profile['city']?.toString()
           : map['city']?.toString(),
       mainSport: sportName ?? map['main_sport']?.toString(),
+      sportId: sportId,
+      sportLockedAt: profile is Map
+          ? profile['sport_locked_at']?.toString()
+          : null,
       sportLevel: profile is Map
           ? profile['sport_level']?.toString()
           : map['sport_level']?.toString(),
@@ -103,9 +122,32 @@ class UserModel extends User {
       birthDate: profile is Map
           ? profile['birth_date']?.toString()
           : map['birth_date']?.toString(),
+      accountStatus: profile is Map
+          ? profile['account_status']?.toString()
+          : map['account_status']?.toString(),
+      isMinor: profile is Map ? profile['is_minor'] == true : false,
+      slug: map['slug']?.toString(),
+      handle: map['handle']?.toString() ??
+          (map['slug'] != null ? '@${map['slug']}' : null),
+      connectionsCount: map['connections_count'] is int
+          ? map['connections_count'] as int
+          : int.tryParse('${map['connections_count'] ?? 0}') ?? 0,
+      mutualConnectionsCount: map['mutual_connections_count'] is int
+          ? map['mutual_connections_count'] as int
+          : int.tryParse('${map['mutual_connections_count'] ?? 0}') ?? 0,
       position: profile is Map
           ? profile['position']?.toString()
           : map['position']?.toString(),
+      heightCm: profile is Map
+          ? double.tryParse(profile['height_cm']?.toString() ?? '')
+          : null,
+      weightKg: profile is Map
+          ? double.tryParse(profile['weight_kg']?.toString() ?? '')
+          : null,
+      wingspanCm: profile is Map
+          ? double.tryParse(profile['wingspan_cm']?.toString() ?? '')
+          : null,
+      laterality: profile is Map ? profile['laterality']?.toString() : null,
       experience: profile is Map && profile['experience'] is List
           ? List<dynamic>.from(profile['experience'] as List)
           : null,
@@ -168,6 +210,30 @@ class UserModel extends User {
       'following_count': followingCount,
       'demo_preview': demoPreview,
       'feature_flags': featureFlags,
+      'profile': {
+        'bio': bio,
+        'phone_number': phoneNumber,
+        'profile_type': profileType,
+        'country': country,
+        'city': city,
+        'sport_id': sportId,
+        'sport': mainSport == null ? null : {'id': sportId, 'name': mainSport},
+        'sport_locked_at': sportLockedAt,
+        'sport_level': sportLevel,
+        'current_team': currentTeam,
+        'birth_date': birthDate,
+        'position': position,
+        'height_cm': heightCm,
+        'weight_kg': weightKg,
+        'wingspan_cm': wingspanCm,
+        'laterality': laterality,
+        'experience': experience,
+        'achievements': achievements,
+        'education': education,
+        'social_links': socialLinks,
+        'verified_badge': verifiedBadge,
+        'verification_status': verificationStatus,
+      },
     };
   }
 }

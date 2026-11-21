@@ -34,6 +34,7 @@ class FeedPage extends ConsumerWidget {
         child: Column(
           children: [
             _FeedHeader(user: user),
+            const _FeedSportScopeBar(),
             Expanded(
               child: feedAsync.when(
                 data: (posts) {
@@ -105,6 +106,54 @@ class FeedPage extends ConsumerWidget {
   }
 }
 
+class _FeedSportScopeBar extends ConsumerWidget {
+  const _FeedSportScopeBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scope = ref.watch(feedSportScopeProvider);
+    final sportName = ref.watch(authControllerProvider).valueOrNull?.mainSport;
+
+    Widget chip(String value, String label) {
+      final selected = scope == value;
+      return ChoiceChip(
+        label: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : Colors.white70,
+            fontSize: 12,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          ),
+        ),
+        selected: selected,
+        selectedColor: const Color(0xFF3B82F6),
+        backgroundColor: Colors.white.withOpacity(0.06),
+        onSelected: (_) {
+          ref.read(feedSportScopeProvider.notifier).state = value;
+        },
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFF0F172A),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Wrap(
+        spacing: 8,
+        children: [
+          chip(
+            'my_sport',
+            sportName == null || sportName.isEmpty
+                ? 'Mi deporte'
+                : 'Mi deporte · $sportName',
+          ),
+          chip('all', 'Todos los deportes'),
+        ],
+      ),
+    );
+  }
+}
+
 // ────────────────────────────────────────────────────────────
 // Header
 // ────────────────────────────────────────────────────────────
@@ -142,6 +191,7 @@ class _FeedHeader extends ConsumerWidget {
             ),
           ),
           IconButton(
+            key: const Key('feed_chat_button'),
             tooltip: 'Chat',
             icon: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 24),
             onPressed: () => Navigator.push(
@@ -182,6 +232,7 @@ class _FeedHeader extends ConsumerWidget {
           ),
           const SizedBox(width: 4),
           GestureDetector(
+            key: const Key('e2e_feed_avatar'),
             onTap: () => Scaffold.of(context).openEndDrawer(),
             child: CircleAvatar(
               radius: 17,

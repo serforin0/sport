@@ -84,9 +84,14 @@ class AuthRepositoryImpl implements AuthRepository {
     required String profileType,
     String? phone,
     String? birthDate,
+    String? guardianEmail,
     String? position,
     String? sportLevel,
     String? currentTeam,
+    String? organizationName,
+    String? rnc,
+    String? organizationDocumentUrl,
+    String? organizationWebsite,
     Map<String, String>? socialLinks,
     String? avatarPath,
   }) async {
@@ -110,11 +115,21 @@ class AuthRepositoryImpl implements AuthRepository {
         'profile_type': profileType,
         if (phone != null && phone.isNotEmpty) 'phone_number': phone,
         if (birthDate != null && birthDate.isNotEmpty) 'birth_date': birthDate,
+        if (guardianEmail != null && guardianEmail.isNotEmpty)
+          'guardian_email': guardianEmail,
         if (position != null && position.isNotEmpty) 'position': position,
         if (sportLevel != null && sportLevel.isNotEmpty)
           'sport_level': sportLevel,
         if (currentTeam != null && currentTeam.isNotEmpty)
           'current_team': currentTeam,
+        if (organizationName != null && organizationName.isNotEmpty)
+          'organization_name': organizationName,
+        if (rnc != null && rnc.isNotEmpty) 'rnc': rnc,
+        if (organizationDocumentUrl != null &&
+            organizationDocumentUrl.isNotEmpty)
+          'organization_document_url': organizationDocumentUrl,
+        if (organizationWebsite != null && organizationWebsite.isNotEmpty)
+          'organization_website': organizationWebsite,
         if (socialLinks != null && socialLinks.isNotEmpty)
           'social_links': socialLinks,
       };

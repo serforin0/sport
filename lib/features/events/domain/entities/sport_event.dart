@@ -1,5 +1,24 @@
 import 'package:equatable/equatable.dart';
 
+class EventParticipantSummary extends Equatable {
+  final String id;
+  final String? name;
+  final String? avatarUrl;
+  final String? status;
+  final String? activityUrl;
+
+  const EventParticipantSummary({
+    required this.id,
+    this.name,
+    this.avatarUrl,
+    this.status,
+    this.activityUrl,
+  });
+
+  @override
+  List<Object?> get props => [id, name, avatarUrl, status, activityUrl];
+}
+
 class SportEvent extends Equatable {
   final String id;
   final String name;
@@ -14,6 +33,14 @@ class SportEvent extends Equatable {
   final String organizerContact;
   final int participantsCount;
   final String? photoUrl;
+  final String? eventType;
+  final String? routeText;
+  final int? capacity;
+  final int? spotsLeft;
+  final bool isFull;
+  final bool isParticipating;
+  final bool isSaved;
+  final List<EventParticipantSummary> participants;
 
   const SportEvent({
     required this.id,
@@ -29,6 +56,14 @@ class SportEvent extends Equatable {
     this.eventTime,
     this.participantsCount = 0,
     this.photoUrl,
+    this.eventType,
+    this.routeText,
+    this.capacity,
+    this.spotsLeft,
+    this.isFull = false,
+    this.isParticipating = false,
+    this.isSaved = false,
+    this.participants = const [],
   });
 
   @override
@@ -46,5 +81,13 @@ class SportEvent extends Equatable {
         organizerContact,
         participantsCount,
         photoUrl,
+        eventType,
+        routeText,
+        capacity,
+        spotsLeft,
+        isFull,
+        isParticipating,
+        isSaved,
+        participants,
       ];
 }

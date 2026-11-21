@@ -6,6 +6,7 @@ import 'package:sport/core/network/json_api_utils.dart';
 import 'package:sport/features/people/domain/people_list_user.dart';
 import '../../domain/entities/chat_conversation.dart';
 import '../../domain/entities/chat_message.dart';
+import '../../domain/entities/send_message_result.dart';
 import '../../domain/repositories/chat_repository.dart';
 
 class ChatRepositoryImpl implements ChatRepository {
@@ -207,7 +208,10 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<ChatMessage> sendMessage(String conversationId, String text) async {
+  Future<SendMessageResult> sendMessage(
+    String conversationId,
+    String text,
+  ) async {
     if (_token == null) {
       throw StateError('Sin sesión');
     }
@@ -221,19 +225,34 @@ class ChatRepositoryImpl implements ChatRepository {
         (response.data is Map
             ? Map<String, dynamic>.from(response.data as Map)
             : null);
+    String? scamWarning;
+    final body = response.data;
+    if (body is Map) {
+      final meta = body['meta'];
+      if (meta is Map && meta['scam_warning'] == true) {
+        scamWarning = meta['scam_message']?.toString() ??
+            'HubSport nunca te pedirá dinero por chat.';
+      }
+    }
     if (map == null) {
-      return ChatMessage(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        text: text,
-        senderId: 'me',
-        timestamp: DateTime.now(),
+      return SendMessageResult(
+        message: ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text: text,
+          senderId: 'me',
+          timestamp: DateTime.now(),
+        ),
+        scamWarning: scamWarning,
       );
     }
-    return ChatMessage(
-      id: map['id']?.toString() ?? '',
-      text: (map['text'] ?? map['content'] ?? map['body'] ?? text).toString(),
-      senderId: 'me',
-      timestamp: _parseTs(map['created_at'] ?? map['sent_at']),
+    return SendMessageResult(
+      message: ChatMessage(
+        id: map['id']?.toString() ?? '',
+        text: (map['text'] ?? map['content'] ?? map['body'] ?? text).toString(),
+        senderId: 'me',
+        timestamp: _parseTs(map['created_at'] ?? map['sent_at']),
+      ),
+      scamWarning: scamWarning,
     );
   }
 

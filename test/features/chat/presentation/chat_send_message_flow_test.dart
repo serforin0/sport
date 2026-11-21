@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sport/features/chat/domain/entities/chat_conversation.dart';
 import 'package:sport/features/chat/domain/entities/chat_message.dart';
+import 'package:sport/features/chat/domain/entities/send_message_result.dart';
 import 'package:sport/features/chat/domain/repositories/chat_repository.dart';
 import 'package:sport/features/chat/presentation/pages/conversation_page.dart';
 import 'package:sport/features/chat/presentation/providers/chat_providers.dart';
@@ -32,11 +33,13 @@ void main() {
     chat = MockChatRepository();
     when(() => chat.getMessages('conv1')).thenAnswer((_) async => []);
     when(() => chat.sendMessage('conv1', 'Hola Laura')).thenAnswer(
-      (_) async => ChatMessage(
-        id: 'm1',
-        text: 'Hola Laura',
-        senderId: 'me',
-        timestamp: DateTime.now(),
+      (_) async => SendMessageResult(
+        message: ChatMessage(
+          id: 'm1',
+          text: 'Hola Laura',
+          senderId: 'me',
+          timestamp: DateTime.now(),
+        ),
       ),
     );
   });

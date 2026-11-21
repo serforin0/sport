@@ -185,8 +185,30 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                   key: const Key('sport_field'),
                   label: 'Deporte',
                   controller: _sportController,
-                  suffixIcon: const Icon(Icons.keyboard_arrow_down, color: Colors.white24),
+                  readOnly: _sportController.text.trim().isNotEmpty,
+                  suffixIcon: Icon(
+                    _sportController.text.trim().isNotEmpty
+                        ? Icons.lock_outline
+                        : Icons.keyboard_arrow_down,
+                    color: Colors.white24,
+                  ),
                 ),
+                if (_sportController.text.trim().isNotEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Text(
+                      'El deporte no se puede cambiar desde el perfil. Contacta a HubSport si necesitas un cambio.',
+                      style: TextStyle(color: Colors.white38, fontSize: 12),
+                    ),
+                  )
+                else
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Si aún no tienes deporte asignado, completa el alta o contacta a HubSport.',
+                      style: TextStyle(color: Colors.white38, fontSize: 12),
+                    ),
+                  ),
                 const SizedBox(height: 24),
                 _EditField(
                   key: const Key('position_field'),
@@ -252,6 +274,7 @@ class _EditField extends StatelessWidget {
   final int maxLines;
   final Widget? suffixIcon;
   final String? Function(String?)? validator;
+  final bool readOnly;
 
   const _EditField({
     super.key,
@@ -261,6 +284,7 @@ class _EditField extends StatelessWidget {
     this.maxLines = 1,
     this.suffixIcon,
     this.validator,
+    this.readOnly = false,
   });
 
   @override
@@ -281,6 +305,7 @@ class _EditField extends StatelessWidget {
         TextFormField(
           controller: controller,
           maxLines: maxLines,
+          readOnly: readOnly,
           style: const TextStyle(color: Colors.white, fontSize: 16),
           validator: validator,
           decoration: InputDecoration(

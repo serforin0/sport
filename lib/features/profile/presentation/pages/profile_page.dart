@@ -7,6 +7,8 @@ import 'package:sport/features/feed/presentation/widgets/post_card.dart';
 import 'package:sport/features/settings/presentation/pages/settings_page.dart';
 import 'package:sport/features/settings/presentation/pages/edit_profile_page.dart';
 import 'package:sport/features/profile/presentation/pages/statistics_page.dart';
+import 'package:sport/features/scout_metrics/presentation/pages/scout_metrics_page.dart';
+import 'package:sport/features/connections/presentation/pages/connection_circle_page.dart';
 import 'package:sport/features/auth/domain/entities/user.dart';
 
 class ProfilePage extends ConsumerWidget {
@@ -239,6 +241,16 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      if (user.handle != null && user.handle!.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          user.handle!,
+                          style: const TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 4),
                       Text(
                         _detailLine(user),
@@ -257,6 +269,26 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
                             fontSize: 11,
                           ),
                         ),
+                      const SizedBox(height: 8),
+                      InkWell(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ConnectionCirclePage(
+                              userId: user.id,
+                              userName: user.name,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          '${user.connectionsCount} conexiones',
+                          style: const TextStyle(
+                            color: Color(0xFF3B82F6),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 24),
 
                       Row(
@@ -282,6 +314,21 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
                         ],
                       ),
 
+                      if (user.accountStatus == 'pending_guardian') ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF78350F).withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'Cuenta pendiente de confirmación del tutor. Hasta entonces no podrás publicar ni chatear.',
+                            style: TextStyle(color: Colors.white70, fontSize: 12),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 32),
                       const _SectionHeader(title: 'Acerca de'),
                       const SizedBox(height: 12),
@@ -301,6 +348,24 @@ class _ProfileContentState extends ConsumerState<_ProfileContent> {
                       const SizedBox(height: 16),
                       _DetailedStatsGrid(stats: user.stats),
                       const SizedBox(height: 16),
+                      Center(
+                        child: TextButton(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ScoutMetricsPage(),
+                            ),
+                          ),
+                          child: const Text(
+                            'Perfil scout (físico y métricas) →',
+                            style: TextStyle(
+                              color: Color(0xFF3B82F6),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
                       Center(
                         child: TextButton(
                           onPressed: () => Navigator.push(

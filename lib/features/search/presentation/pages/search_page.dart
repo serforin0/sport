@@ -29,6 +29,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   Country? _selectedCountry;
   String? _selectedSportLevel;
   String? _selectedOpportunityType;
+  bool _talentSearch = false;
+  bool _verifiedOnly = false;
 
   @override
   void dispose() {
@@ -48,6 +50,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         city: _cityController.text.trim(),
         sportLevel: _selectedSportLevel,
         opportunityType: _selectedOpportunityType,
+        talent: _talentSearch,
+        verifiedOnly: _verifiedOnly,
       );
     });
   }
@@ -65,6 +69,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       _selectedCountry = null;
       _selectedSportLevel = null;
       _selectedOpportunityType = null;
+      _talentSearch = false;
+      _verifiedOnly = false;
       _cityController.clear();
       _activeFilters = null;
     });
@@ -471,6 +477,34 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             },
             onChanged: (value) => setState(() => _selectedOpportunityType = value),
           ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text(
+              'Búsqueda de talento',
+              style: TextStyle(color: Colors.white, fontSize: 14),
+            ),
+            subtitle: const Text(
+              'Solo atletas (entrenadores/reclutadores)',
+              style: TextStyle(color: Colors.white54, fontSize: 11),
+            ),
+            value: _talentSearch,
+            activeColor: const Color(0xFF3B82F6),
+            onChanged: (v) => setState(() {
+              _talentSearch = v;
+              if (!v) _verifiedOnly = false;
+            }),
+          ),
+          if (_talentSearch)
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text(
+                'Solo verificados',
+                style: TextStyle(color: Colors.white, fontSize: 14),
+              ),
+              value: _verifiedOnly,
+              activeColor: const Color(0xFF22C55E),
+              onChanged: (v) => setState(() => _verifiedOnly = v),
+            ),
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,

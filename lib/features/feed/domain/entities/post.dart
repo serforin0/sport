@@ -26,6 +26,8 @@ class Post {
   final List<Comment> comments;
   final String? location;
   final String? eventName;
+  final String? postType;
+  final String? activityUrl;
 
   const Post({
     required this.id,
@@ -39,6 +41,8 @@ class Post {
     this.comments = const [],
     this.location,
     this.eventName,
+    this.postType,
+    this.activityUrl,
   });
 
   String? get imageUrl => images.isNotEmpty ? images.first : null;

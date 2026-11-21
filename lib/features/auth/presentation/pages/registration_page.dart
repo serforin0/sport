@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sport/core/utils/age_utils.dart';
+import 'package:sport/features/legal/presentation/pages/legal_document_page.dart';
 import '../providers/auth_providers.dart';
 import '../providers/meta_providers.dart';
 import 'package:sport/features/auth/domain/entities/meta.dart';
@@ -25,6 +27,12 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   final _confirmPassCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _cityCtrl = TextEditingController();
+  final _birthDateCtrl = TextEditingController();
+  final _guardianEmailCtrl = TextEditingController();
+  final _orgNameCtrl = TextEditingController();
+  final _rncCtrl = TextEditingController();
+  final _orgDocCtrl = TextEditingController();
+  final _orgWebCtrl = TextEditingController();
   final _positionCtrl = TextEditingController();
   final _teamCtrl = TextEditingController();
   final _instagramCtrl = TextEditingController();
@@ -50,6 +58,12 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
     _confirmPassCtrl.dispose();
     _phoneCtrl.dispose();
     _cityCtrl.dispose();
+    _birthDateCtrl.dispose();
+    _guardianEmailCtrl.dispose();
+    _orgNameCtrl.dispose();
+    _rncCtrl.dispose();
+    _orgDocCtrl.dispose();
+    _orgWebCtrl.dispose();
     _positionCtrl.dispose();
     _teamCtrl.dispose();
     _instagramCtrl.dispose();
@@ -99,6 +113,47 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecciona país y ciudad')));
         return;
       }
+      final birth = _birthDateCtrl.text.trim();
+      if (birth.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Indica tu fecha de nacimiento (AAAA-MM-DD)')),
+        );
+        return;
+      }
+      if (AgeUtils.isUnder12(birth)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Debes tener al menos 12 años para registrarte')),
+        );
+        return;
+      }
+      if (AgeUtils.isMinorAthlete(birth, _selectedProfileType)) {
+        final guardian = _guardianEmailCtrl.text.trim().toLowerCase();
+        if (guardian.isEmpty || !guardian.contains('@')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Los atletas de 12 a 17 años necesitan el correo del tutor')),
+          );
+          return;
+        }
+        if (guardian == _emailCtrl.text.trim().toLowerCase()) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('El correo del tutor debe ser distinto al tuyo')),
+          );
+          return;
+        }
+      }
+      if (_selectedProfileType == 'recruiter' ||
+          _selectedProfileType == 'sponsor') {
+        if (_orgNameCtrl.text.trim().isEmpty ||
+            _rncCtrl.text.trim().isEmpty ||
+            _orgDocCtrl.text.trim().isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Completa organización, RNC y documento'),
+            ),
+          );
+          return;
+        }
+      }
     }
 
     if (_currentStep < 2) {
@@ -139,9 +194,35 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
             sportId: sportId,
             profileType: _selectedProfileType,
             phone: _phoneCtrl.text.trim(),
+            birthDate: _birthDateCtrl.text.trim(),
+            guardianEmail: AgeUtils.isMinorAthlete(
+              _birthDateCtrl.text.trim(),
+              _selectedProfileType,
+            )
+                ? _guardianEmailCtrl.text.trim().toLowerCase()
+                : null,
             position: isFan ? null : _positionCtrl.text.trim(),
             sportLevel: isFan ? null : _selectedSportLevel,
             currentTeam: isFan ? null : _teamCtrl.text.trim(),
+            organizationName:
+                (_selectedProfileType == 'recruiter' ||
+                        _selectedProfileType == 'sponsor')
+                    ? _orgNameCtrl.text.trim()
+                    : null,
+            rnc: (_selectedProfileType == 'recruiter' ||
+                    _selectedProfileType == 'sponsor')
+                ? _rncCtrl.text.trim()
+                : null,
+            organizationDocumentUrl:
+                (_selectedProfileType == 'recruiter' ||
+                        _selectedProfileType == 'sponsor')
+                    ? _orgDocCtrl.text.trim()
+                    : null,
+            organizationWebsite:
+                (_selectedProfileType == 'recruiter' ||
+                        _selectedProfileType == 'sponsor')
+                    ? _orgWebCtrl.text.trim()
+                    : null,
             socialLinks: socialLinks,
             avatarPath: _avatarFile?.path,
           );
@@ -225,6 +306,12 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                   selectedCountry: _selectedCountry,
                   phoneCtrl: _phoneCtrl,
                   cityCtrl: _cityCtrl,
+                  birthDateCtrl: _birthDateCtrl,
+                  guardianEmailCtrl: _guardianEmailCtrl,
+                  orgNameCtrl: _orgNameCtrl,
+                  rncCtrl: _rncCtrl,
+                  orgDocCtrl: _orgDocCtrl,
+                  orgWebCtrl: _orgWebCtrl,
                   selectedProfileType: _selectedProfileType,
                   onProfileTypeChanged: (value) => setState(() => _selectedProfileType = value),
                   avatarFile: _avatarFile,
@@ -367,12 +454,57 @@ class _StepBasicInfo extends StatelessWidget {
                 onChanged: onTermsChanged,
                 activeColor: const Color(0xFF2CB5FF),
               ),
-              const Expanded(
+              Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(top: 12),
-                  child: Text(
-                    'He leído y acepto los Términos y Condiciones de HubSport',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      const Text(
+                        'He leído y acepto los ',
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LegalDocumentPage(
+                              type: LegalDocumentType.terms,
+                            ),
+                          ),
+                        ),
+                        child: const Text(
+                          'Términos',
+                          style: TextStyle(
+                            color: Color(0xFF2CB5FF),
+                            fontSize: 12,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                      const Text(
+                        ' y la ',
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LegalDocumentPage(
+                              type: LegalDocumentType.privacy,
+                            ),
+                          ),
+                        ),
+                        child: const Text(
+                          'Privacidad',
+                          style: TextStyle(
+                            color: Color(0xFF2CB5FF),
+                            fontSize: 12,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -389,6 +521,12 @@ class _StepContactInfo extends ConsumerWidget {
   final Country? selectedCountry;
   final TextEditingController phoneCtrl;
   final TextEditingController cityCtrl;
+  final TextEditingController birthDateCtrl;
+  final TextEditingController guardianEmailCtrl;
+  final TextEditingController orgNameCtrl;
+  final TextEditingController rncCtrl;
+  final TextEditingController orgDocCtrl;
+  final TextEditingController orgWebCtrl;
   final String selectedProfileType;
   final ValueChanged<String> onProfileTypeChanged;
   final File? avatarFile;
@@ -399,6 +537,12 @@ class _StepContactInfo extends ConsumerWidget {
     required this.selectedCountry,
     required this.phoneCtrl,
     required this.cityCtrl,
+    required this.birthDateCtrl,
+    required this.guardianEmailCtrl,
+    required this.orgNameCtrl,
+    required this.rncCtrl,
+    required this.orgDocCtrl,
+    required this.orgWebCtrl,
     required this.selectedProfileType,
     required this.onProfileTypeChanged,
     required this.avatarFile,
@@ -470,6 +614,53 @@ class _StepContactInfo extends ConsumerWidget {
           _RegField(label: 'Ciudad *', controller: cityCtrl, hint: 'Ej. Santo Domingo'),
           const SizedBox(height: 20),
           _RegField(label: 'Teléfono', controller: phoneCtrl, hint: '+34 600 000 000'),
+          const SizedBox(height: 20),
+          _RegField(
+            label: 'Fecha de nacimiento *',
+            controller: birthDateCtrl,
+            hint: 'AAAA-MM-DD',
+          ),
+          if (AgeUtils.isMinorAthlete(birthDateCtrl.text.trim(), selectedProfileType)) ...[
+            const SizedBox(height: 20),
+            _RegField(
+              label: 'Correo del tutor *',
+              controller: guardianEmailCtrl,
+              hint: 'tutor@correo.com',
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Tu cuenta se activará cuando el tutor confirme el correo.',
+              style: TextStyle(color: Colors.white54, fontSize: 12),
+            ),
+          ],
+          if (selectedProfileType == 'recruiter' ||
+              selectedProfileType == 'sponsor') ...[
+            const SizedBox(height: 20),
+            _RegField(
+              label: 'Organización *',
+              controller: orgNameCtrl,
+              hint: 'Academia / club / empresa',
+            ),
+            const SizedBox(height: 16),
+            _RegField(label: 'RNC *', controller: rncCtrl, hint: '1-01-xxxxx-x'),
+            const SizedBox(height: 16),
+            _RegField(
+              label: 'URL documento de respaldo *',
+              controller: orgDocCtrl,
+              hint: 'https://…',
+            ),
+            const SizedBox(height: 16),
+            _RegField(
+              label: 'Sitio web / LinkedIn',
+              controller: orgWebCtrl,
+              hint: 'https://…',
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'La cuenta quedará en revisión hasta validar la organización.',
+              style: TextStyle(color: Colors.white54, fontSize: 12),
+            ),
+          ],
           const SizedBox(height: 24),
           const Text('Foto de perfil', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),

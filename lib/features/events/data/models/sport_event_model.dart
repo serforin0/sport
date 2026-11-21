@@ -16,11 +16,44 @@ class SportEventModel extends SportEvent {
     super.eventTime,
     super.participantsCount,
     super.photoUrl,
+    super.eventType,
+    super.routeText,
+    super.capacity,
+    super.spotsLeft,
+    super.isFull,
+    super.isParticipating,
+    super.isSaved,
+    super.participants,
   });
 
   factory SportEventModel.fromApi(Map<String, dynamic> json) {
     final sport = json['sport'];
     final dateRaw = json['event_date'] ?? json['date'];
+    final rawParticipants = json['participants'];
+    final participants = <EventParticipantSummary>[];
+    if (rawParticipants is List) {
+      for (final item in rawParticipants) {
+        if (item is! Map) continue;
+        final map = Map<String, dynamic>.from(item);
+        final user = map['user'] is Map
+            ? Map<String, dynamic>.from(map['user'] as Map)
+            : <String, dynamic>{};
+        final first = user['first_name']?.toString() ?? '';
+        final last = user['last_name']?.toString() ?? '';
+        final full = '$first $last'.trim();
+        participants.add(
+          EventParticipantSummary(
+            id: map['id']?.toString() ?? user['id']?.toString() ?? '',
+            name: full.isNotEmpty
+                ? full
+                : (user['name']?.toString() ?? 'Participante'),
+            avatarUrl: UrlUtils.resolve(user['avatar_url']?.toString()),
+            status: map['status']?.toString(),
+            activityUrl: map['activity_url']?.toString(),
+          ),
+        );
+      }
+    }
 
     return SportEventModel(
       id: json['id']?.toString() ?? '',
@@ -34,8 +67,17 @@ class SportEventModel extends SportEvent {
       eventTime: json['event_time']?.toString(),
       organizerName: json['organizer_name']?.toString() ?? 'Organizador',
       organizerContact: json['organizer_contact']?.toString() ?? '',
-      participantsCount: int.tryParse((json['participants_count'] ?? 0).toString()) ?? 0,
+      participantsCount:
+          int.tryParse((json['participants_count'] ?? 0).toString()) ?? 0,
       photoUrl: UrlUtils.resolve(json['photo_url']?.toString()),
+      eventType: json['event_type']?.toString(),
+      routeText: json['route_text']?.toString(),
+      capacity: int.tryParse((json['capacity'] ?? '').toString()),
+      spotsLeft: int.tryParse((json['spots_left'] ?? '').toString()),
+      isFull: json['is_full'] == true,
+      isParticipating: json['is_participating'] == true,
+      isSaved: json['is_saved'] == true,
+      participants: participants,
     );
   }
 }

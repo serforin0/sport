@@ -66,12 +66,20 @@ class UserProfileModel extends UserProfile {
       }
     }
 
+    String sportName = '';
+    final rawSport = p?['sport'] ?? json['sport'];
+    if (rawSport is Map) {
+      sportName = rawSport['name']?.toString() ?? '';
+    } else {
+      sportName = rawSport?.toString() ?? '';
+    }
+
     return UserProfileModel(
       firstName: fn,
       lastName: ln,
       birthDate: p?['birth_date']?.toString() ?? p?['birthDate']?.toString() ?? json['birth_date']?.toString() ?? '',
       profileType: p?['profile_type']?.toString() ?? p?['profileType']?.toString() ?? json['profile_type']?.toString() ?? 'Deportista',
-      sport: p?['sport']?.toString() ?? json['sport']?.toString() ?? '',
+      sport: sportName,
       position: p?['position']?.toString() ?? json['position']?.toString() ?? '',
       bio: p?['bio']?.toString() ?? json['bio']?.toString() ?? '',
     );
@@ -97,7 +105,6 @@ class UserProfileModel extends UserProfile {
         'last_name': lastName,
         'birth_date': birthDate,
         'profile_type': profileTypeValue,
-        'sport': sport,
         'position': position,
         'bio': bio,
       },

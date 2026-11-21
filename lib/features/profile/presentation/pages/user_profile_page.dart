@@ -11,6 +11,8 @@ import 'package:sport/features/feed/presentation/providers/feed_providers.dart';
 import 'package:sport/features/chat/presentation/providers/chat_providers.dart';
 import 'package:sport/features/chat/presentation/pages/conversation_page.dart';
 import 'package:sport/features/references/presentation/providers/references_providers.dart';
+import 'package:sport/features/safety/presentation/pages/report_user_page.dart';
+import 'package:sport/features/connections/presentation/pages/connection_circle_page.dart';
 
 class UserProfilePage extends ConsumerWidget {
   final String userId;
@@ -444,6 +446,16 @@ class _UserProfileContentState extends ConsumerState<_UserProfileContent> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      if (user.handle != null && user.handle!.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          user.handle!,
+                          style: const TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
                       if (user.verifiedBadge || user.isEmailVerified) ...[
                         const SizedBox(height: 8),
                         Container(
@@ -474,6 +486,28 @@ class _UserProfileContentState extends ConsumerState<_UserProfileContent> {
                           fontSize: 12,
                         ),
                         textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      InkWell(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ConnectionCirclePage(
+                              userId: user.id,
+                              userName: user.name,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          user.mutualConnectionsCount > 0
+                              ? '${user.connectionsCount} conexiones · ${user.mutualConnectionsCount} en común'
+                              : '${user.connectionsCount} conexiones',
+                          style: const TextStyle(
+                            color: Color(0xFF3B82F6),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 4),
                       if (_dateLine(user).isNotEmpty)
@@ -529,6 +563,24 @@ class _UserProfileContentState extends ConsumerState<_UserProfileContent> {
                               ? _handleConnect
                               : _showComingSoon,
                         ),
+                      Center(
+                        child: TextButton.icon(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ReportUserPage(
+                                targetUserId: user.id,
+                                targetName: user.name,
+                              ),
+                            ),
+                          ),
+                          icon: const Icon(Icons.flag_outlined, color: Colors.white54, size: 16),
+                          label: const Text(
+                            'Reportar perfil',
+                            style: TextStyle(color: Colors.white54, fontSize: 12),
+                          ),
+                        ),
+                      ),
                       if (user.connectionStatus == 'accepted') ...[
                         const SizedBox(height: 12),
                         _OutlinedButton(

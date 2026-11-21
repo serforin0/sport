@@ -23,6 +23,7 @@ class ConversationTile extends StatelessWidget {
     final hasAvatar = conversation.contactAvatar.isNotEmpty;
 
     return InkWell(
+      key: Key('chat_conversation_tile_${conversation.id}'),
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),

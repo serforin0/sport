@@ -1,4 +1,5 @@
 class NewsArticle {
+  final String? id;
   final String title;
   final String description;
   final String url;
@@ -7,6 +8,7 @@ class NewsArticle {
   final DateTime publishedAt;
 
   const NewsArticle({
+    this.id,
     required this.title,
     required this.description,
     required this.url,

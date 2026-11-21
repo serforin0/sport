@@ -20,10 +20,21 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
   final _photoCtrl = TextEditingController();
   final _organizerCtrl = TextEditingController();
   final _contactCtrl = TextEditingController();
+  final _routeCtrl = TextEditingController();
+  final _capacityCtrl = TextEditingController();
   Sport? _sport;
+  String? _eventType = 'race';
   DateTime? _date;
   TimeOfDay? _time;
   bool _saving = false;
+
+  static const _types = [
+    ('race', 'Carrera'),
+    ('clinic', 'Clínica'),
+    ('meetup', 'Encuentro'),
+    ('training', 'Entrenamiento'),
+    ('other', 'Otro'),
+  ];
 
   @override
   void dispose() {
@@ -35,6 +46,8 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
     _photoCtrl.dispose();
     _organizerCtrl.dispose();
     _contactCtrl.dispose();
+    _routeCtrl.dispose();
+    _capacityCtrl.dispose();
     super.dispose();
   }
 
@@ -77,6 +90,7 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
       'event_date': '${_date!.year.toString().padLeft(4, '0')}-${_date!.month.toString().padLeft(2, '0')}-${_date!.day.toString().padLeft(2, '0')}',
       if (_time != null) 'event_time': '${_time!.hour.toString().padLeft(2, '0')}:${_time!.minute.toString().padLeft(2, '0')}',
       'location': _locationCtrl.text.trim(),
+      if (_routeCtrl.text.trim().isNotEmpty) 'route_text': _routeCtrl.text.trim(),
       if (_cityCtrl.text.trim().isNotEmpty) 'city': _cityCtrl.text.trim(),
       if (_countryCtrl.text.trim().isNotEmpty) 'country': _countryCtrl.text.trim(),
       'sport_id': _sport!.id,
@@ -84,6 +98,9 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
       if (_photoCtrl.text.trim().isNotEmpty) 'photo_url': _photoCtrl.text.trim(),
       'organizer_name': _organizerCtrl.text.trim(),
       'organizer_contact': _contactCtrl.text.trim(),
+      if (_eventType != null) 'event_type': _eventType,
+      if (_capacityCtrl.text.trim().isNotEmpty)
+        'capacity': int.tryParse(_capacityCtrl.text.trim()),
     });
 
     if (!mounted) return;
@@ -110,6 +127,19 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
         padding: const EdgeInsets.all(20),
         children: [
           _Field(label: 'Nombre del evento *', controller: _nameCtrl),
+          const SizedBox(height: 14),
+          DropdownButtonFormField<String>(
+            value: _eventType,
+            dropdownColor: const Color(0xFF1E293B),
+            decoration: _decoration('Tipo de evento'),
+            style: const TextStyle(color: Colors.white),
+            items: _types
+                .map(
+                  (t) => DropdownMenuItem(value: t.$1, child: Text(t.$2)),
+                )
+                .toList(),
+            onChanged: (value) => setState(() => _eventType = value),
+          ),
           const SizedBox(height: 14),
           sportsAsync.when(
             data: (sports) => DropdownButtonFormField<Sport>(
@@ -146,6 +176,14 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
           const SizedBox(height: 14),
           _Field(label: 'Ubicación *', controller: _locationCtrl),
           const SizedBox(height: 14),
+          _Field(label: 'Ruta (texto)', controller: _routeCtrl),
+          const SizedBox(height: 14),
+          _Field(
+            label: 'Cupo (opcional)',
+            controller: _capacityCtrl,
+            keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 14),
           _Field(label: 'Ciudad', controller: _cityCtrl),
           const SizedBox(height: 14),
           _Field(label: 'País', controller: _countryCtrl),
@@ -177,14 +215,21 @@ class _Field extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final int maxLines;
+  final TextInputType? keyboardType;
 
-  const _Field({required this.label, required this.controller, this.maxLines = 1});
+  const _Field({
+    required this.label,
+    required this.controller,
+    this.maxLines = 1,
+    this.keyboardType,
+  });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
       maxLines: maxLines,
+      keyboardType: keyboardType,
       style: const TextStyle(color: Colors.white),
       decoration: _decoration(label),
     );

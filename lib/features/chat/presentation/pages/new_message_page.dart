@@ -78,6 +78,7 @@ class _NewMessagePageState extends ConsumerState<NewMessagePage> {
     final async = ref.watch(acceptedConnectionsProvider);
 
     return Scaffold(
+      key: const Key('chat_new_message_page'),
       backgroundColor: const Color(0xFF0F2A5B),
       appBar: AppBar(
         toolbarHeight: 86,

@@ -69,6 +69,8 @@ class PostModel extends Post {
     super.comments,
     super.location,
     super.eventName,
+    super.postType,
+    super.activityUrl,
   });
 
   factory PostModel.fromMap(Map<String, dynamic> json) {
@@ -161,6 +163,8 @@ class PostModel extends Post {
       comments: comments,
       location: _string(json['location'] ?? json['place']),
       eventName: _string(json['event_name'] ?? json['eventName']),
+      postType: _string(json['post_type'] ?? json['postType']),
+      activityUrl: _string(json['activity_url'] ?? json['activityUrl']),
     );
   }
 
@@ -178,6 +182,8 @@ class PostModel extends Post {
           comments.map((e) => (e as CommentModel).toMap()).toList(),
       'location': location,
       'eventName': eventName,
+      'postType': postType,
+      'activityUrl': activityUrl,
     };
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sport/features/demo/presentation/providers/demo_showcase_providers.dart';
 import 'package:sport/features/demo/presentation/widgets/demo_badge.dart';
+import 'package:sport/features/settings/presentation/pages/add_card_page.dart';
 
 class PaymentMethodsPage extends ConsumerWidget {
   const PaymentMethodsPage({super.key});
@@ -59,10 +60,9 @@ class PaymentMethodsPage extends ConsumerWidget {
               ),
             const SizedBox(height: 16),
             _AddPaymentMethodTile(
-              onTap: () => showDemoSimulation(
+              onTap: () => Navigator.push(
                 context,
-                'Agregar tarjeta es una simulación. No se solicitarán ni '
-                'guardarán número de tarjeta, fecha o CVV.',
+                MaterialPageRoute(builder: (_) => const AddCardPage()),
               ),
             ),
           ],

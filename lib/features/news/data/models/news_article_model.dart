@@ -2,6 +2,7 @@ import '../../domain/entities/news_article.dart';
 
 class NewsArticleModel extends NewsArticle {
   const NewsArticleModel({
+    super.id,
     required super.title,
     required super.description,
     required super.url,
@@ -12,6 +13,7 @@ class NewsArticleModel extends NewsArticle {
 
   factory NewsArticleModel.fromJson(Map<String, dynamic> json) {
     return NewsArticleModel(
+      id: json['id']?.toString(),
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       url: json['url'] ?? '',
@@ -36,8 +38,9 @@ class NewsArticleModel extends NewsArticle {
         (sourceMap is Map ? sourceMap['name']?.toString() : null) ??
         'Noticia';
     return NewsArticleModel(
+      id: json['id']?.toString(),
       title: json['title']?.toString() ?? '',
-      description: (json['description'] ?? json['summary'] ?? json['excerpt'] ?? '').toString(),
+      description: (json['description'] ?? json['summary'] ?? json['excerpt'] ?? json['content'] ?? '').toString(),
       url: (json['url'] ?? json['link'] ?? json['slug'] ?? '').toString(),
       urlToImage: json['url_to_image']?.toString() ?? json['urlToImage']?.toString() ?? json['image_url']?.toString(),
       source: sourceName,

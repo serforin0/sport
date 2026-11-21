@@ -30,6 +30,17 @@ class AuthController extends StateNotifier<AsyncValue<User?>> {
     );
   }
 
+  /// Refreshes the current user without wiping session state.
+  Future<void> refreshUser() async {
+    final previous = state;
+    state = const AsyncValue<User?>.loading().copyWithPrevious(previous);
+    final result = await _repository.getCurrentUser();
+    result.fold(
+      (failure) => state = previous,
+      (user) => state = AsyncValue.data(user),
+    );
+  }
+
   Future<void> signIn(String email, String password) async {
     state = const AsyncValue.loading();
     final result = await _repository.signInWithEmailAndPassword(
@@ -63,9 +74,14 @@ class AuthController extends StateNotifier<AsyncValue<User?>> {
     required String profileType,
     String? phone,
     String? birthDate,
+    String? guardianEmail,
     String? position,
     String? sportLevel,
     String? currentTeam,
+    String? organizationName,
+    String? rnc,
+    String? organizationDocumentUrl,
+    String? organizationWebsite,
     Map<String, String>? socialLinks,
     String? avatarPath,
   }) async {
@@ -80,9 +96,14 @@ class AuthController extends StateNotifier<AsyncValue<User?>> {
       profileType: profileType,
       phone: phone,
       birthDate: birthDate,
+      guardianEmail: guardianEmail,
       position: position,
       sportLevel: sportLevel,
       currentTeam: currentTeam,
+      organizationName: organizationName,
+      rnc: rnc,
+      organizationDocumentUrl: organizationDocumentUrl,
+      organizationWebsite: organizationWebsite,
       socialLinks: socialLinks,
       avatarPath: avatarPath,
     );

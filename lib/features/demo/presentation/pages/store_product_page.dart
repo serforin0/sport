@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sport/features/demo/domain/entities/demo_showcase.dart';
 import 'package:sport/features/demo/presentation/providers/demo_showcase_providers.dart';
@@ -158,11 +159,44 @@ class _StoreProductPageState extends ConsumerState<StoreProductPage> {
             decoration: const InputDecoration(labelText: 'Dirección'),
           ),
           const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: _busy ? null : _checkout,
-            child: Text(_busy ? 'Confirmando…' : 'Pagar y confirmar pedido'),
-          ),
+          if (product.affiliateUrl != null &&
+              product.affiliateUrl!.isNotEmpty) ...[
+            OutlinedButton.icon(
+              onPressed: () async {
+                await Clipboard.setData(
+                  ClipboardData(text: product.affiliateUrl!),
+                );
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Enlace de tienda copiado:\n${product.affiliateUrl}',
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.open_in_new),
+              label: const Text('Ver en tienda (afiliado)'),
+            ),
+            const SizedBox(height: 12),
+          ],
+          const SizedBox(height: 72),
         ],
+      ),
+      bottomNavigationBar: Material(
+        color: const Color(0xFF0F172A),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+            child: ElevatedButton(
+              key: const Key('store_checkout_pay'),
+              onPressed: _busy ? null : _checkout,
+              child: Text(
+                _busy ? 'Confirmando…' : 'Pagar y confirmar pedido',
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -175,6 +209,11 @@ class StoreReceiptPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final amount = order['amount'];
+    final commission = order['commission_amount'];
+    final percent = order['commission_percent'];
+    final net = order['net_amount'];
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
@@ -203,9 +242,21 @@ class StoreReceiptPage extends StatelessWidget {
               style: const TextStyle(color: Colors.white70),
             ),
             Text(
-              '${order['amount'] ?? ''} ${order['currency'] ?? ''}',
+              '$amount ${order['currency'] ?? ''}',
               style: const TextStyle(color: Color(0xFF5EEAD4), fontSize: 18),
             ),
+            if (percent != null && commission != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Comisión HubSport ($percent%): $commission ${order['currency'] ?? ''}',
+                style: const TextStyle(color: Colors.white54, fontSize: 13),
+              ),
+              if (net != null)
+                Text(
+                  'Neto estimado vendedor: $net ${order['currency'] ?? ''}',
+                  style: const TextStyle(color: Colors.white54, fontSize: 13),
+                ),
+            ],
             const SizedBox(height: 12),
             Text(
               '${order['recipient_name'] ?? ''}\n${order['address'] ?? ''}, ${order['city'] ?? ''}',

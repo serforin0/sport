@@ -6,6 +6,9 @@ import '../../domain/entities/post.dart';
 import '../../domain/repositories/feed_repository.dart';
 import '../../data/repositories/feed_repository_impl.dart';
 
+/// `all` | `my_sport`
+final feedSportScopeProvider = StateProvider<String>((ref) => 'all');
+
 final feedRepositoryProvider = Provider<FeedRepository>((ref) {
   return FeedRepositoryImpl(
     ref.watch(apiClientProvider),
@@ -18,10 +21,13 @@ final feedProvider = AsyncNotifierProvider<FeedNotifier, List<Post>>(() {
 });
 
 class FeedNotifier extends AsyncNotifier<List<Post>> {
+  bool get _mySport => ref.read(feedSportScopeProvider) == 'my_sport';
+
   @override
   Future<List<Post>> build() async {
+    ref.watch(feedSportScopeProvider);
     final repository = ref.watch(feedRepositoryProvider);
-    final result = await repository.getPosts();
+    final result = await repository.getPosts(mySport: _mySport);
 
     return result.fold(
       (failure) => throw Exception(failure.message),
@@ -33,7 +39,7 @@ class FeedNotifier extends AsyncNotifier<List<Post>> {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(feedRepositoryProvider);
-      final result = await repository.getPosts();
+      final result = await repository.getPosts(mySport: _mySport);
       return result.fold(
         (failure) => throw Exception(failure.message),
         (posts) => posts,
@@ -83,7 +89,7 @@ class FeedNotifier extends AsyncNotifier<List<Post>> {
 final userPostsProvider = FutureProvider.family<List<Post>, String>((ref, userId) async {
   final repository = ref.watch(feedRepositoryProvider);
   final result = await repository.getPosts(page: 0, limit: 20, userId: userId);
-  
+
   return result.fold(
     (failure) => throw Exception(failure.message),
     (posts) => posts,
@@ -93,11 +99,9 @@ final userPostsProvider = FutureProvider.family<List<Post>, String>((ref, userId
 final getPostByIdProvider = FutureProvider.family<Post, String>((ref, postId) async {
   final repository = ref.watch(feedRepositoryProvider);
   final result = await repository.getPostById(postId);
-  
+
   return result.fold(
     (failure) => throw Exception(failure.message),
     (post) => post,
   );
 });
-
-

@@ -18,6 +18,8 @@ class SearchFilters {
   final String? city;
   final String? sportLevel;
   final String? opportunityType;
+  final bool talent;
+  final bool verifiedOnly;
 
   const SearchFilters({
     this.query = '',
@@ -27,6 +29,8 @@ class SearchFilters {
     this.city,
     this.sportLevel,
     this.opportunityType,
+    this.talent = false,
+    this.verifiedOnly = false,
   });
 
   Map<String, dynamic> toQueryParameters() {
@@ -38,7 +42,33 @@ class SearchFilters {
       if (city?.trim().isNotEmpty == true) 'city': city!.trim(),
       if (sportLevel?.isNotEmpty == true) 'sport_level': sportLevel,
       if (opportunityType?.isNotEmpty == true) 'opportunity_type': opportunityType,
+      if (talent) 'talent': 1,
+      if (verifiedOnly) 'verified_only': 1,
     };
+  }
+
+  SearchFilters copyWith({
+    String? query,
+    String? profileType,
+    String? sportId,
+    String? countryId,
+    String? city,
+    String? sportLevel,
+    String? opportunityType,
+    bool? talent,
+    bool? verifiedOnly,
+  }) {
+    return SearchFilters(
+      query: query ?? this.query,
+      profileType: profileType ?? this.profileType,
+      sportId: sportId ?? this.sportId,
+      countryId: countryId ?? this.countryId,
+      city: city ?? this.city,
+      sportLevel: sportLevel ?? this.sportLevel,
+      opportunityType: opportunityType ?? this.opportunityType,
+      talent: talent ?? this.talent,
+      verifiedOnly: verifiedOnly ?? this.verifiedOnly,
+    );
   }
 
   @override
@@ -51,7 +81,9 @@ class SearchFilters {
           countryId == other.countryId &&
           city == other.city &&
           sportLevel == other.sportLevel &&
-          opportunityType == other.opportunityType;
+          opportunityType == other.opportunityType &&
+          talent == other.talent &&
+          verifiedOnly == other.verifiedOnly;
 
   @override
   int get hashCode => Object.hash(
@@ -62,6 +94,8 @@ class SearchFilters {
         city,
         sportLevel,
         opportunityType,
+        talent,
+        verifiedOnly,
       );
 }
 

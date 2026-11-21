@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:sport/features/news/domain/entities/news_article.dart';
+import 'package:sport/features/share/presentation/pages/public_share_preview_page.dart';
 
 class NewsDetailPage extends StatelessWidget {
   final NewsArticle article;
@@ -19,6 +20,32 @@ class NewsDetailPage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Ver cómo lo ve alguien sin cuenta',
+            icon: const Icon(Icons.ios_share, color: Colors.white),
+            onPressed: () {
+              final shareId = article.id;
+              if (shareId == null || shareId.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Esta noticia no tiene vista pública aún'),
+                  ),
+                );
+                return;
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PublicSharePreviewPage(
+                    type: 'news',
+                    id: shareId,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
         title: const Text(
           'Noticia',
           style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),

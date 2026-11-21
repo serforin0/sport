@@ -7,8 +7,18 @@ final eventsRepositoryProvider = Provider<EventsRepository>((ref) {
   return EventsRepository(ref.watch(apiClientProvider));
 });
 
-final eventsListProvider = AsyncNotifierProvider<EventsListNotifier, List<SportEvent>>(() {
+final eventsListProvider =
+    AsyncNotifierProvider<EventsListNotifier, List<SportEvent>>(() {
   return EventsListNotifier();
+});
+
+final eventDetailProvider =
+    FutureProvider.autoDispose.family<SportEvent, String>((ref, id) async {
+  final result = await ref.watch(eventsRepositoryProvider).getEvent(id);
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (event) => event,
+  );
 });
 
 class EventsListNotifier extends AsyncNotifier<List<SportEvent>> {
@@ -38,6 +48,38 @@ class EventsListNotifier extends AsyncNotifier<List<SportEvent>> {
       (_) => false,
       (_) {
         ref.invalidateSelf();
+        ref.invalidate(eventDetailProvider(eventId));
+        return true;
+      },
+    );
+  }
+
+  Future<bool> leave(String eventId) async {
+    final result = await ref.read(eventsRepositoryProvider).leave(eventId);
+    return result.fold(
+      (_) => false,
+      (_) {
+        ref.invalidateSelf();
+        ref.invalidate(eventDetailProvider(eventId));
+        return true;
+      },
+    );
+  }
+
+  Future<bool> linkActivity({
+    required String eventId,
+    required String activityUrl,
+    String? note,
+  }) async {
+    final result = await ref.read(eventsRepositoryProvider).linkActivity(
+          eventId: eventId,
+          activityUrl: activityUrl,
+          note: note,
+        );
+    return result.fold(
+      (_) => false,
+      (_) {
+        ref.invalidate(eventDetailProvider(eventId));
         return true;
       },
     );

@@ -40,6 +40,7 @@ class _ChatListPageState extends ConsumerState<ChatListPage> {
   Widget build(BuildContext context) {
     final conversationsAsync = ref.watch(conversationsProvider);
     return Scaffold(
+      key: const Key('chat_list_page'),
       backgroundColor: const Color(0xFF0F2A5B),
       appBar: AppBar(
         toolbarHeight: 88,
@@ -72,6 +73,7 @@ class _ChatListPageState extends ConsumerState<ChatListPage> {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: IconButton(
+              key: const Key('chat_new_message_button'),
               icon: Container(
                 width: 28,
                 height: 28,

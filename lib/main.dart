@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sport/core/providers/shared_preferences_provider.dart';
 
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
+import 'features/onboarding/presentation/pages/role_guide_page.dart';
 import 'features/auth/presentation/pages/auth_landing_page.dart';
 import 'features/settings/data/datasources/settings_local_datasource.dart';
 import 'features/settings/presentation/providers/profile_providers.dart';
@@ -16,6 +18,8 @@ import 'core/widgets/hubsport_wordmark.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('es');
+  await initializeDateFormatting('en');
   final sharedPreferences = await SharedPreferences.getInstance();
 
     runApp(
@@ -47,11 +51,14 @@ class App extends ConsumerWidget {
           if (!done) return const OnboardingPage();
 
           if (authState.isLoading) {
-            return cachedUser != null ? const MainShell() : const AuthPage();
+            return cachedUser != null ? const _PostAuthHome() : const AuthPage();
           }
 
           return authState.when(
-            data: (user) => user != null ? const MainShell() : const AuthPage(),
+            data: (user) {
+              if (user == null) return const AuthPage();
+              return const _PostAuthHome();
+            },
             loading: () => const AuthPage(),
             error: (error, stackTrace) => const AuthPage(),
           );
@@ -59,6 +66,20 @@ class App extends ConsumerWidget {
         loading: () => const _Splash(),
         error: (error, stackTrace) => const _Splash(),
       ),
+    );
+  }
+}
+
+class _PostAuthHome extends ConsumerWidget {
+  const _PostAuthHome();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final guideDone = ref.watch(roleGuideDoneProvider);
+    return guideDone.when(
+      data: (done) => done ? const MainShell() : const RoleGuidePage(),
+      loading: () => const _Splash(),
+      error: (_, _) => const MainShell(),
     );
   }
 }

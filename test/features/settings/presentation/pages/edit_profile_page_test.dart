@@ -48,6 +48,10 @@ void main() {
     // Verify fields by labels
     expect(find.text('Nombres'), findsOneWidget);
     expect(find.text('Apellidos'), findsOneWidget);
+    expect(
+      find.textContaining('El deporte no se puede cambiar'),
+      findsOneWidget,
+    );
     
     // Verify values from mock
     expect(find.text('Test'), findsOneWidget);

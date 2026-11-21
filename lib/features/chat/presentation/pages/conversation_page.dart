@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:sport/features/safety/presentation/pages/report_user_page.dart';
 import '../../domain/entities/chat_conversation.dart';
 import '../../domain/entities/chat_message.dart';
 import '../providers/chat_providers.dart';
@@ -27,14 +28,23 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
     super.dispose();
   }
 
-  void _send() {
+  Future<void> _send() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
     _controller.clear();
-    ref
+    final warning = await ref
         .read(messagesNotifierProvider(widget.conversation.id).notifier)
         .send(text);
     _scheduleScrollToBottom();
+    if (!mounted) return;
+    if (warning != null && warning.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(warning),
+          backgroundColor: const Color(0xFFB45309),
+        ),
+      );
+    }
   }
 
   void _scheduleScrollToBottom() {
@@ -71,6 +81,23 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
               onTap: () {
                 Navigator.pop(context);
                 _handleBlockUser();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.flag_outlined, color: Colors.white),
+              title: const Text('Reportar', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ReportUserPage(
+                      targetUserId: widget.conversation.contactUserId,
+                      conversationId: int.tryParse(widget.conversation.id),
+                      targetName: widget.conversation.contactName,
+                    ),
+                  ),
+                );
               },
             ),
           ],
@@ -202,6 +229,7 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
         ),
         actions: [
           IconButton(
+            key: const Key('chat_conversation_menu'),
             icon: const Icon(Icons.more_vert, color: Colors.white, size: 30),
             onPressed: _showOptionsMenu,
           ),
@@ -257,6 +285,7 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
                   children: [
                     Expanded(
                       child: TextField(
+                        key: const Key('chat_message_input'),
                         controller: _controller,
                         style: const TextStyle(
                           color: Colors.white,
@@ -310,6 +339,7 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
                         final hasText = value.text.trim().isNotEmpty;
                         if (!hasText) return const SizedBox(width: 4);
                         return IconButton(
+                          key: const Key('chat_send_button'),
                           onPressed: _send,
                           icon: const Icon(
                             Icons.send_rounded,
@@ -365,7 +395,11 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
     if (day == today) return 'Hoy';
     final yesterday = today.subtract(const Duration(days: 1));
     if (day == yesterday) return 'Ayer';
-    return DateFormat('d MMM', 'es').format(day);
+    try {
+      return DateFormat('d MMM', 'es').format(day);
+    } catch (_) {
+      return '${day.day}/${day.month}/${day.year}';
+    }
   }
 }
 

@@ -42,11 +42,12 @@ class MessagesNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
     }
   }
 
-  Future<void> send(String text) async {
-    final msg = await _repo.sendMessage(conversationId, text);
+  Future<String?> send(String text) async {
+    final result = await _repo.sendMessage(conversationId, text);
     state.whenData((list) {
-      state = AsyncValue.data([...list, msg]);
+      state = AsyncValue.data([...list, result.message]);
     });
+    return result.scamWarning;
   }
 }
 

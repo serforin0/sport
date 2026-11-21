@@ -9,10 +9,22 @@ class User {
   final String? country;
   final String? city;
   final String? mainSport;
+  final String? sportId;
+  final String? sportLockedAt;
   final String? sportLevel;
   final String? currentTeam;
   final String? birthDate;
+  final String? accountStatus;
+  final bool isMinor;
+  final String? slug;
+  final String? handle;
+  final int connectionsCount;
+  final int mutualConnectionsCount;
   final String? position;
+  final double? heightCm;
+  final double? weightKg;
+  final double? wingspanCm;
+  final String? laterality;
   final List<dynamic>? experience;
   final List<dynamic>? achievements;
   final List<dynamic>? education;
@@ -37,10 +49,22 @@ class User {
     this.country,
     this.city,
     this.mainSport,
+    this.sportId,
+    this.sportLockedAt,
     this.sportLevel,
     this.currentTeam,
     this.birthDate,
+    this.accountStatus,
+    this.isMinor = false,
+    this.slug,
+    this.handle,
+    this.connectionsCount = 0,
+    this.mutualConnectionsCount = 0,
     this.position,
+    this.heightCm,
+    this.weightKg,
+    this.wingspanCm,
+    this.laterality,
     this.experience,
     this.achievements,
     this.education,
@@ -103,10 +127,22 @@ class User {
     String? country,
     String? city,
     String? mainSport,
+    String? sportId,
+    String? sportLockedAt,
     String? sportLevel,
     String? currentTeam,
     String? birthDate,
+    String? accountStatus,
+    bool? isMinor,
+    String? slug,
+    String? handle,
+    int? connectionsCount,
+    int? mutualConnectionsCount,
     String? position,
+    double? heightCm,
+    double? weightKg,
+    double? wingspanCm,
+    String? laterality,
     List<dynamic>? experience,
     List<dynamic>? achievements,
     List<dynamic>? education,
@@ -131,10 +167,23 @@ class User {
       country: country ?? this.country,
       city: city ?? this.city,
       mainSport: mainSport ?? this.mainSport,
+      sportId: sportId ?? this.sportId,
+      sportLockedAt: sportLockedAt ?? this.sportLockedAt,
       sportLevel: sportLevel ?? this.sportLevel,
       currentTeam: currentTeam ?? this.currentTeam,
       birthDate: birthDate ?? this.birthDate,
+      accountStatus: accountStatus ?? this.accountStatus,
+      isMinor: isMinor ?? this.isMinor,
+      slug: slug ?? this.slug,
+      handle: handle ?? this.handle,
+      connectionsCount: connectionsCount ?? this.connectionsCount,
+      mutualConnectionsCount:
+          mutualConnectionsCount ?? this.mutualConnectionsCount,
       position: position ?? this.position,
+      heightCm: heightCm ?? this.heightCm,
+      weightKg: weightKg ?? this.weightKg,
+      wingspanCm: wingspanCm ?? this.wingspanCm,
+      laterality: laterality ?? this.laterality,
       experience: experience ?? this.experience,
       achievements: achievements ?? this.achievements,
       education: education ?? this.education,

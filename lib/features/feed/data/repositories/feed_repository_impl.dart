@@ -48,7 +48,12 @@ class FeedRepositoryImpl implements FeedRepository {
   }
 
   @override
-  Future<Result<List<Post>>> getPosts({int page = 0, int limit = 10, String? userId}) async {
+  Future<Result<List<Post>>> getPosts({
+    int page = 0,
+    int limit = 10,
+    String? userId,
+    bool mySport = false,
+  }) async {
     if (_token == null) {
       return Err(ValidationFailure('Inicia sesión para ver el feed'));
     }
@@ -59,6 +64,9 @@ class FeedRepositoryImpl implements FeedRepository {
       };
       if (userId != null) {
         queryParameters['user_id'] = userId;
+      }
+      if (mySport) {
+        queryParameters['my_sport'] = 1;
       }
 
       final response = await apiClient.get(
@@ -154,6 +162,8 @@ class FeedRepositoryImpl implements FeedRepository {
         'published_at': _mysqlDateTime(DateTime.now()),
         if (post.location != null) 'location': post.location,
         if (post.eventName != null) 'event_name': post.eventName,
+        if (post.postType != null) 'post_type': post.postType,
+        if (post.activityUrl != null) 'activity_url': post.activityUrl,
       });
 
       // Adjuntar todas las imágenes locales seleccionadas.

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sport/features/legal/presentation/pages/legal_document_page.dart';
+import 'package:sport/features/safety/presentation/pages/reports_inbox_page.dart';
 import 'package:sport/features/support/presentation/providers/support_providers.dart';
 import 'contact_support_page.dart';
 
@@ -85,7 +87,35 @@ class HelpSupportPage extends StatelessWidget {
             _SupportOptionTile(
               icon: Icons.description_outlined,
               title: 'Términos y condiciones',
-              onTap: () => _showComingSoon(context),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const LegalDocumentPage(
+                    type: LegalDocumentType.terms,
+                  ),
+                ),
+              ),
+            ),
+            _SupportOptionTile(
+              icon: Icons.privacy_tip_outlined,
+              title: 'Política de privacidad',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const LegalDocumentPage(
+                    type: LegalDocumentType.privacy,
+                  ),
+                ),
+              ),
+            ),
+            _SupportOptionTile(
+              icon: Icons.shield_outlined,
+              title: 'Bandeja de reportes',
+              subtitle: 'Solo moderadores autorizados',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ReportsInboxPage()),
+              ),
             ),
             const SizedBox(height: 40),
             Container(

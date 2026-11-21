@@ -17,9 +17,13 @@ class NewsRepositoryImpl implements NewsRepository {
 
 
   @override
-  Future<Result<List<NewsArticle>>> getSportsNews() async {
+  Future<Result<List<NewsArticle>>> getSportsNews({String? sportId}) async {
     try {
-      // Fetch from both sources in parallel
+      if (sportId != null && sportId.isNotEmpty) {
+        final internal = await remoteDataSource.getSportsNews(sportId: sportId);
+        return Ok(List<NewsArticle>.from(internal));
+      }
+
       final results = await Future.wait([
         remoteDataSource.getSportsNews(),
         externalDataSource.getTopHeadlines(),
@@ -27,8 +31,6 @@ class NewsRepositoryImpl implements NewsRepository {
 
       final internalNews = results[0] as List<NewsArticle>;
       final externalNews = results[1] as List<NewsArticle>;
-
-      // Combine and sort by date descending
       final combined = [...internalNews, ...externalNews];
       combined.sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:sport/features/feed/domain/entities/post.dart';
 import 'package:sport/features/feed/presentation/providers/feed_providers.dart';
+import 'package:sport/features/share/presentation/pages/public_share_preview_page.dart';
 import 'package:sport/core/widgets/skeleton_base.dart';
 import 'dart:io';
 
@@ -100,6 +101,21 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
         backgroundColor: const Color(0xFF0F2A5B),
         elevation: 0,
         leadingWidth: 72,
+        actions: [
+          IconButton(
+            tooltip: 'Ver cómo lo ve alguien sin cuenta',
+            icon: const Icon(Icons.ios_share, color: Colors.white),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PublicSharePreviewPage(
+                  type: 'post',
+                  id: widget.post.id,
+                ),
+              ),
+            ),
+          ),
+        ],
         leading: IconButton(
           icon: Container(
             width: 44,
@@ -126,7 +142,6 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
           ),
         ),
         centerTitle: true,
-        actions: const [],
       ),
       body: Column(
         children: [
